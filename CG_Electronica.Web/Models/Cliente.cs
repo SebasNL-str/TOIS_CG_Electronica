@@ -4,6 +4,7 @@ namespace CG_Electronica.Web.Models;
 
 public class Cliente
 {
+    [Key]
     public int IdCliente { get; set; }
 
     [Required(ErrorMessage = "El nombre del cliente es obligatorio.")]

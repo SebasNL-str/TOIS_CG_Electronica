@@ -4,6 +4,7 @@ namespace CG_Electronica.Web.Models;
 
 public class Permiso
 {
+    [Key]
     public int IdPermiso { get; set; }
 
     [Required(ErrorMessage = "El nombre del permiso es obligatorio.")]

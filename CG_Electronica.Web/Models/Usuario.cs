@@ -4,6 +4,7 @@ namespace CG_Electronica.Web.Models;
 
 public class Usuario
 {
+    [Key]
     public int IdUsuario { get; set; }
 
     [Required(ErrorMessage = "El nombre completo es obligatorio.")]

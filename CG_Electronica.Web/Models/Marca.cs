@@ -4,6 +4,7 @@ namespace CG_Electronica.Web.Models;
 
 public class Marca
 {
+    [Key]
     public int IdMarca { get; set; }
 
     [Required(ErrorMessage = "El nombre de la marca es obligatorio.")]

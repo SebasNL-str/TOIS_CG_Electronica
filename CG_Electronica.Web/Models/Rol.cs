@@ -4,6 +4,7 @@ namespace CG_Electronica.Web.Models;
 
 public class Rol
 {
+    [Key]
     public int IdRol { get; set; }
 
     [Required(ErrorMessage = "El nombre del rol es obligatorio.")]
