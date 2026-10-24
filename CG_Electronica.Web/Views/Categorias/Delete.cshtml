@@ -1,22 +1,16 @@
-﻿@model Marca
+﻿@model Categoria
 @{
-    ViewData["Title"] = "Eliminar marca";
+    ViewData["Title"] = "Eliminar categoría";
 }
 
 <h1 class="text-danger">@ViewData["Title"]</h1>
 <hr />
 <div class="alert alert-warning">
-    ¿Seguro que deseas eliminar la marca <strong>@Model.NombreMarca</strong>?
+    ¿Seguro que deseas eliminar la categoría <strong>@Model.NombreCategoria</strong>?
 </div>
-<dl class="row">
-    <dt class="col-sm-2">Estado</dt>
-    <dd class="col-sm-10">
-        <span class="badge @(Model.Estado == "Activo" ? "bg-success" : "bg-secondary")">@Model.Estado</span>
-    </dd>
-</dl>
 
 <form asp-action="Delete" method="post">
-    <input type="hidden" asp-for="IdMarca" />
+    <input type="hidden" asp-for="IdCategoria" />
     <button type="submit" class="btn btn-danger">Sí, eliminar</button>
     <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
 </form>
