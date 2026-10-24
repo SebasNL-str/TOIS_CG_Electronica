@@ -1,0 +1,15 @@
+﻿@model CG_Electronica.Web.Models.ViewModels.MarcaViewModel
+
+<div class="mb-3">
+    <label asp-for="NombreMarca" class="form-label"></label>
+    <input asp-for="NombreMarca" class="form-control" />
+    <span asp-validation-for="NombreMarca" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Estado" class="form-label"></label>
+    <select asp-for="Estado" class="form-select">
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+    </select>
+    <span asp-validation-for="Estado" class="text-danger"></span>
+</div>
