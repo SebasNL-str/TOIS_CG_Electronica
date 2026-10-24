@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using CG_Electronica.Web.Data;
+using CG_Electronica.Web.Models;
 using CG_Electronica.Web.Models.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -13,7 +14,9 @@ namespace CG_Electronica.Web.Controllers;
 public class AccountController : Controller
 {
     private readonly AppDbContext _context;
-    private readonly PasswordHasher<string> resultado = new();
+
+    // Hasher del mismo tipo que usamos en DbInitializer (PasswordHasher<Usuario>)
+    private readonly PasswordHasher<Usuario> _hasher = new();
 
     public AccountController(AppDbContext context)
     {
@@ -43,16 +46,15 @@ public class AccountController : Controller
                     .ThenInclude(rp => rp.Permiso)
             .FirstOrDefaultAsync(u => u.NombreUsuario == model.NombreUsuario);
 
-        // Verificar hash (PBKDF2). Mensaje genérico por seguridad.
+        // Verificación PBKDF2 contra el hash almacenado en la BD
         if (usuario == null ||
-            resultado.VerifyHashedPassword(model.NombreUsuario, usuario.Contrasena, model.Contrasena)
+            _hasher.VerifyHashedPassword(usuario, usuario.Contrasena, model.Contrasena)
                 == PasswordVerificationResult.Failed)
         {
             ModelState.AddModelError(string.Empty, "Usuario o contraseña incorrectos.");
             return View(model);
         }
 
-        // Construir claims: identidad, nombre, rol y permisos
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
