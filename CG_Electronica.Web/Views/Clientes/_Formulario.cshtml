@@ -1,5 +1,8 @@
 ﻿@model CG_Electronica.Web.Models.ViewModels.ClienteViewModel
 
+@* ESTO FALTABA: el ID debe viajar oculto en el formulario *@
+<input asp-for="IdCliente" type="hidden" />
+
 <div class="mb-3">
     <label asp-for="NombreCliente" class="form-label"></label>
     <input asp-for="NombreCliente" class="form-control" />

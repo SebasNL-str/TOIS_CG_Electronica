@@ -23,7 +23,7 @@ public class ClientesController : Controller
     }
 
     // Validación remota de cédula única (la usa el [Remote] del ViewModel)
-    [HttpPost] // Remote usa POST por defecto con antiforgery; lo dejamos GET para simplicidad:
+    [HttpGet] // Remote usa POST por defecto con antiforgery; lo dejamos GET para simplicidad:
     [IgnoreAntiforgeryToken]
     public async Task<IActionResult> VerificarCedula(string cedula, int idCliente)
     {
