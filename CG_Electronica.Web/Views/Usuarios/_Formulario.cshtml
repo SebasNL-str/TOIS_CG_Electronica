@@ -1,0 +1,35 @@
+﻿@model CG_Electronica.Web.Models.ViewModels.UsuarioViewModel
+
+<input asp-for="IdUsuario" type="hidden" />
+
+<div class="mb-3">
+    <label asp-for="Nombre" class="form-label fw-bold"></label>
+    <input asp-for="Nombre" class="form-control" placeholder="Ej. Juan Pérez" />
+    <span asp-validation-for="Nombre" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="NombreUsuario" class="form-label fw-bold"></label>
+    <input asp-for="NombreUsuario" class="form-control" autocomplete="off" />
+    <span asp-validation-for="NombreUsuario" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Clave" class="form-label fw-bold"></label>
+    <input asp-for="Clave" class="form-control" autocomplete="new-password" />
+    <span asp-validation-for="Clave" class="text-danger"></span>
+    @if (Model.IdUsuario > 0)
+    {
+        <div class="form-text text-muted">
+            <i class="bi bi-info-circle"></i> Deje en blanco si no desea cambiar la contraseña actual.
+        </div>
+    }
+</div>
+
+<div class="mb-3">
+    <label asp-for="IdRol" class="form-label fw-bold"></label>
+    <select asp-for="IdRol" class="form-select" asp-items="ViewBag.Roles">
+        <option value="">-- Seleccione un Rol --</option>
+    </select>
+    <span asp-validation-for="IdRol" class="text-danger"></span>
+</div>
