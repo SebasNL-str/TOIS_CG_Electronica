@@ -99,5 +99,128 @@ namespace CG_Electronica.Web.Controllers
             ViewBag.Roles = new SelectList(await _context.Roles.ToListAsync(), "IdRol", "NombreRol", model.IdRol);
             return View(model);
         }
+
+        // 4. GET: Formulario de Edición
+        [Authorize(Policy = "Permiso:Usuarios.Editar")]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var usuario = await _context.Usuarios.FindAsync(id);
+            if (usuario == null) return NotFound();
+
+            // Mapeamos los datos al ViewModel. 
+            // OJO: Dejamos "Clave" vacío por seguridad, no enviamos el hash a la vista.
+            var model = new Models.ViewModels.UsuarioViewModel
+            {
+                IdUsuario = usuario.IdUsuario,
+                Nombre = usuario.Nombre,
+                NombreUsuario = usuario.NombreUsuario,
+                IdRol = usuario.IdRol
+            };
+
+            ViewBag.Roles = new SelectList(await _context.Roles.ToListAsync(), "IdRol", "NombreRol", model.IdRol);
+            return View(model);
+        }
+
+        // 5. POST: Guardar Edición
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = "Permiso:Usuarios.Editar")]
+        public async Task<IActionResult> Edit(int id, Models.ViewModels.UsuarioViewModel model)
+        {
+            if (id != model.IdUsuario) return NotFound();
+
+            if (ModelState.IsValid)
+            {
+                // Validar unicidad de NombreUsuario (excluyendo el usuario actual)
+                bool existe = await _context.Usuarios
+                    .AnyAsync(u => u.NombreUsuario.ToLower() == model.NombreUsuario.ToLower() && u.IdUsuario != id);
+
+                if (existe)
+                {
+                    ModelState.AddModelError("NombreUsuario", "El nombre de usuario ya está registrado por otro.");
+                }
+                else
+                {
+                    var usuarioDb = await _context.Usuarios.FindAsync(id);
+                    if (usuarioDb == null) return NotFound();
+
+                    // Actualizamos los campos de texto
+                    usuarioDb.Nombre = model.Nombre;
+                    usuarioDb.NombreUsuario = model.NombreUsuario;
+                    usuarioDb.IdRol = model.IdRol;
+
+                    // SOLO actualizamos la contraseña si el usuario escribió una nueva
+                    if (!string.IsNullOrEmpty(model.Clave))
+                    {
+                        var hasher = new PasswordHasher<Usuario>();
+                        usuarioDb.Contrasena = hasher.HashPassword(usuarioDb, model.Clave);
+                    }
+
+                    _context.Update(usuarioDb);
+                    await _context.SaveChangesAsync();
+
+                    TempData["Ok"] = "Usuario actualizado exitosamente.";
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
+            ViewBag.Roles = new SelectList(await _context.Roles.ToListAsync(), "IdRol", "NombreRol", model.IdRol);
+            return View(model);
+        }
+
+        // 6. GET: Confirmar Eliminación
+        [Authorize(Policy = "Permiso:Usuarios.Editar")]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var usuario = await _context.Usuarios
+                .Include(u => u.Rol)
+                .FirstOrDefaultAsync(m => m.IdUsuario == id);
+
+            if (usuario == null) return NotFound();
+
+            // Protección extra por si se llega por URL
+            if (usuario.NombreUsuario.ToLower() == "admin")
+            {
+                TempData["Error"] = "No está permitido eliminar la cuenta del administrador principal.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(usuario);
+        }
+
+        // 7. POST: Confirmar Eliminación
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = "Permiso:Usuarios.Editar")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var usuario = await _context.Usuarios.FindAsync(id);
+            if (usuario != null)
+            {
+                if (usuario.NombreUsuario.ToLower() == "admin")
+                {
+                    TempData["Error"] = "No está permitido eliminar al administrador principal.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                try
+                {
+                    _context.Usuarios.Remove(usuario);
+                    await _context.SaveChangesAsync();
+                    TempData["Ok"] = "Usuario eliminado exitosamente.";
+                }
+                catch (DbUpdateException)
+                {
+                    // Capturamos el error si el usuario ya tiene Facturas, Auditorias o Movimientos asociados
+                    TempData["Error"] = "No se puede eliminar este usuario porque tiene registros de historial asociados (ventas, movimientos, etc.).";
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
