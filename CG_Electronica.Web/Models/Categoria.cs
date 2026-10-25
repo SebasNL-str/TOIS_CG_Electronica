@@ -10,4 +10,5 @@ public class Categoria
     [Required(ErrorMessage = "El nombre de la categoría es obligatorio.")]
     [StringLength(150)]
     public string NombreCategoria { get; set; } = string.Empty;
+    public string Estado { get; set; } = "Activo";
 }

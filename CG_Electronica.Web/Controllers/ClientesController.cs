@@ -14,12 +14,11 @@ public class ClientesController : Controller
 
     public ClientesController(AppDbContext context) => _context = context;
 
+    [Authorize(Policy = "Permiso:Clientes.Ver")]
     public async Task<IActionResult> Index()
     {
-        var lista = await _context.Clientes
-            .OrderBy(c => c.NombreCliente)
-            .ToListAsync();
-        return View(lista);
+        var clientes = await _context.Clientes.ToListAsync();
+        return View(clientes);
     }
 
     // Validación remota de cédula única (la usa el [Remote] del ViewModel)
@@ -57,40 +56,63 @@ public class ClientesController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    // GET: Edit
     [Authorize(Policy = "Permiso:Clientes.Editar")]
-    public async Task<IActionResult> Edit(int id)
+    public async Task<IActionResult> Edit(int? id)
     {
+        if (id == null) return NotFound();
+
         var cliente = await _context.Clientes.FindAsync(id);
         if (cliente == null) return NotFound();
 
-        return View(new ClienteViewModel
+        var model = new Models.ViewModels.ClienteViewModel
         {
             IdCliente = cliente.IdCliente,
+            Cedula = cliente.Cedula,
             NombreCliente = cliente.NombreCliente,
             Telefono = cliente.Telefono,
-            Cedula = cliente.Cedula
-        });
+            Estado = cliente.Estado // <--- Mapeamos el estado
+        };
+
+        return View(model);
     }
 
+
+    // POST: Edit
     [HttpPost]
-    [Authorize(Policy = "Permiso:Clientes.Editar")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(ClienteViewModel model)
+    [Authorize(Policy = "Permiso:Clientes.Editar")]
+    public async Task<IActionResult> Edit(int id, Models.ViewModels.ClienteViewModel model)
     {
-        if (await _context.Clientes.AnyAsync(c => c.Cedula == model.Cedula && c.IdCliente != model.IdCliente))
-            ModelState.AddModelError(nameof(model.Cedula), "Ya existe OTRO cliente registrado con esta cédula.");
+        if (id != model.IdCliente) return NotFound();
 
-        if (!ModelState.IsValid) return View(model);
+        if (ModelState.IsValid)
+        {
+            bool existeCedula = await _context.Clientes
+                .AnyAsync(c => c.Cedula == model.Cedula && c.IdCliente != id);
 
-        var cliente = await _context.Clientes.FindAsync(model.IdCliente);
-        if (cliente == null) return NotFound();
+            if (existeCedula)
+            {
+                ModelState.AddModelError("Cedula", "Ya existe otro cliente con esta cédula.");
+            }
+            else
+            {
+                var clienteDb = await _context.Clientes.FindAsync(id);
+                if (clienteDb == null) return NotFound();
 
-        cliente.NombreCliente = model.NombreCliente;
-        cliente.Telefono = model.Telefono;
-        cliente.Cedula = model.Cedula;
-        await _context.SaveChangesAsync();
-        TempData["Ok"] = "Cliente actualizado correctamente.";
-        return RedirectToAction(nameof(Index));
+                clienteDb.Cedula = model.Cedula;
+                clienteDb.NombreCliente = model.NombreCliente;
+                clienteDb.Telefono = model.Telefono;
+                clienteDb.Estado = model.Estado; // <--- Guardamos el estado
+
+                _context.Update(clienteDb);
+                await _context.SaveChangesAsync();
+
+                TempData["Ok"] = "Cliente actualizado correctamente.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        return View(model);
     }
 
     [Authorize(Policy = "Permiso:Clientes.Editar")]
@@ -101,17 +123,22 @@ public class ClientesController : Controller
         return View(cliente);
     }
 
-    [HttpPost, ActionName("Delete")]
-    [Authorize(Policy = "Permiso:Clientes.Editar")]
+    // POST: Delete(BORRADO LÓGICO / INACTIVACIÓN)
+[HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
+    [Authorize(Policy = "Permiso:Clientes.Editar")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var cliente = await _context.Clientes.FindAsync(id);
         if (cliente != null)
         {
-            _context.Clientes.Remove(cliente);
+            // BORRADO LÓGICO: En lugar de _context.Clientes.Remove(cliente);
+            cliente.Estado = "Inactivo";
+
+            _context.Update(cliente);
             await _context.SaveChangesAsync();
-            TempData["Ok"] = "Cliente eliminado correctamente.";
+
+            TempData["Ok"] = "Cliente inactivado correctamente.";
         }
         return RedirectToAction(nameof(Index));
     }

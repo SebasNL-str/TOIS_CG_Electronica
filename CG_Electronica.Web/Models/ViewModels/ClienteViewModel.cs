@@ -25,4 +25,7 @@ public class ClienteViewModel
     [Remote("VerificarCedula", "Clientes", AdditionalFields = nameof(IdCliente),
             ErrorMessage = "Ya existe un cliente registrado con esta cédula.")]
     public string Cedula { get; set; } = string.Empty;
+    [Required(ErrorMessage = "El estado es obligatorio.")]
+    [Display(Name = "Estado")]
+    public string Estado { get; set; } = "Activo";
 }

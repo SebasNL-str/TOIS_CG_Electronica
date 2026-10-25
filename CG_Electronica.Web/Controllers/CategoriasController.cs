@@ -37,34 +37,57 @@ public class CategoriasController : Controller
     }
 
     [Authorize(Policy = "Permiso:Catalogos.Editar")]
-    public async Task<IActionResult> Edit(int id)
+    public async Task<IActionResult> Edit(int? id)
     {
+        if (id == null) return NotFound();
+
         var categoria = await _context.Categorias.FindAsync(id);
         if (categoria == null) return NotFound();
-        return View(new CategoriaViewModel
+
+        var model = new Models.ViewModels.CategoriaViewModel
         {
             IdCategoria = categoria.IdCategoria,
-            NombreCategoria = categoria.NombreCategoria
-        });
+            NombreCategoria = categoria.NombreCategoria,
+            Estado = categoria.Estado // <--- Mapeamos el estado
+        };
+
+        return View(model);
     }
 
+
+    // POST: Edit
     [HttpPost]
-    [Authorize(Policy = "Permiso:Catalogos.Editar")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(CategoriaViewModel model)
+    [Authorize(Policy = "Permiso:Catalogos.Editar")]
+    public async Task<IActionResult> Edit(int id, Models.ViewModels.CategoriaViewModel model)
     {
-        if (await _context.Categorias.AnyAsync(c => c.NombreCategoria == model.NombreCategoria && c.IdCategoria != model.IdCategoria))
-            ModelState.AddModelError(nameof(model.NombreCategoria), "Ya existe OTRA categoría con ese nombre.");
+        if (id != model.IdCategoria) return NotFound();
 
-        if (!ModelState.IsValid) return View(model);
+        if (ModelState.IsValid)
+        {
+            bool existe = await _context.Categorias
+                .AnyAsync(c => c.NombreCategoria.ToLower() == model.NombreCategoria.ToLower() && c.IdCategoria != id);
 
-        var categoria = await _context.Categorias.FindAsync(model.IdCategoria);
-        if (categoria == null) return NotFound();
+            if (existe)
+            {
+                ModelState.AddModelError("NombreCategoria", "Ya existe otra categoría con este nombre.");
+            }
+            else
+            {
+                var categoriaDb = await _context.Categorias.FindAsync(id);
+                if (categoriaDb == null) return NotFound();
 
-        categoria.NombreCategoria = model.NombreCategoria;
-        await _context.SaveChangesAsync();
-        TempData["Ok"] = "Categoría actualizada correctamente.";
-        return RedirectToAction(nameof(Index));
+                categoriaDb.NombreCategoria = model.NombreCategoria;
+                categoriaDb.Estado = model.Estado; // <--- Guardamos el estado
+
+                _context.Update(categoriaDb);
+                await _context.SaveChangesAsync();
+
+                TempData["Ok"] = "Categoría actualizada correctamente.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+        return View(model);
     }
 
     [Authorize(Policy = "Permiso:Catalogos.Editar")]
@@ -75,17 +98,22 @@ public class CategoriasController : Controller
         return View(categoria);
     }
 
+    // POST: Delete (BORRADO LÓGICO / INACTIVACIÓN)
     [HttpPost, ActionName("Delete")]
-    [Authorize(Policy = "Permiso:Catalogos.Editar")]
     [ValidateAntiForgeryToken]
+    [Authorize(Policy = "Permiso:Catalogos.Editar")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var categoria = await _context.Categorias.FindAsync(id);
         if (categoria != null)
         {
-            _context.Categorias.Remove(categoria);
+            // BORRADO LÓGICO: Cambiamos estado a Inactivo en lugar de Remove
+            categoria.Estado = "Inactivo";
+
+            _context.Update(categoria);
             await _context.SaveChangesAsync();
-            TempData["Ok"] = "Categoría eliminada correctamente.";
+
+            TempData["Ok"] = "Categoría inactivada correctamente.";
         }
         return RedirectToAction(nameof(Index));
     }

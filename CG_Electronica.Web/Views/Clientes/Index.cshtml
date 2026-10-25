@@ -30,6 +30,7 @@
             <th>@Html.DisplayNameFor(m => m.NombreCliente)</th>
             <th>@Html.DisplayNameFor(m => m.Cedula)</th>
             <th>@Html.DisplayNameFor(m => m.Telefono)</th>
+            <th>Estado</th>
             @if (User.TienePermiso("Clientes.Editar"))
             {
                 <th class="text-end">Acciones</th>
@@ -50,6 +51,16 @@
                         <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.IdCliente">Eliminar</a>
                     </td>
                 }
+                <td>
+                    @if (item.Estado == "Activo")
+                    {
+                        <span class="badge bg-success">Activo</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Inactivo</span>
+                    }
+                </td>
             </tr>
         }
     </tbody>
