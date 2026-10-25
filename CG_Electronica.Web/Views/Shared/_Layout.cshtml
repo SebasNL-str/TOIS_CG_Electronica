@@ -43,6 +43,12 @@
                                     <a class="nav-link" asp-controller="Categorias" asp-action="Index">Categorías</a>
                                 </li>
                             }
+                            @if (User.TienePermiso("Usuarios.Ver"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Usuarios" asp-action="Index">Usuarios</a>
+                                </li>
+                            }
                             <li class="nav-item ms-auto d-flex align-items-center gap-3 pe-3">
                                 <span class="navbar-text text-dark small mb-0">
                                     <i class="bi bi-person-circle"></i> @User.NombreCompleto() (@User.Rol())
