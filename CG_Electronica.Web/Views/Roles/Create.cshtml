@@ -1,0 +1,30 @@
+﻿@model CG_Electronica.Web.Models.ViewModels.RolViewModel
+@{
+    ViewData["Title"] = "Crear Rol";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card shadow-sm mt-4 border-primary">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-shield-plus"></i> Crear Nuevo Rol</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <partial name="_Formulario" model="Model" />
+
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Guardar Rol</button>
+                        <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+}
