@@ -3,7 +3,7 @@
 <input asp-for="IdCategoria" type="hidden" />
 
 <div class="mb-3">
-    <label asp-for="NombreCategoria" class="form-label"></label>
-    <input asp-for="NombreCategoria" class="form-control" />
+    <label asp-for="NombreCategoria" class="form-label fw-bold"></label>
+    <input asp-for="NombreCategoria" class="form-control" placeholder="Ej. Smartphones, Cargadores, Fundas" autocomplete="off" />
     <span asp-validation-for="NombreCategoria" class="text-danger"></span>
 </div>

@@ -3,13 +3,15 @@
 <input asp-for="IdMarca" type="hidden" />
 
 <div class="mb-3">
-    <label asp-for="NombreMarca" class="form-label"></label>
-    <input asp-for="NombreMarca" class="form-control" />
+    <label asp-for="NombreMarca" class="form-label fw-bold"></label>
+    <input asp-for="NombreMarca" class="form-control" placeholder="Ej. Samsung, Apple, Logitech" autocomplete="off" />
     <span asp-validation-for="NombreMarca" class="text-danger"></span>
 </div>
+
 <div class="mb-3">
-    <label asp-for="Estado" class="form-label"></label>
+    <label asp-for="Estado" class="form-label fw-bold"></label>
     <select asp-for="Estado" class="form-select">
+        <option value="">-- Seleccione Estado --</option>
         <option value="Activo">Activo</option>
         <option value="Inactivo">Inactivo</option>
     </select>
