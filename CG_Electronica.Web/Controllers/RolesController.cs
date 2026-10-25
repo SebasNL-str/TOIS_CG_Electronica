@@ -201,5 +201,61 @@ namespace CG_Electronica.Web.Controllers
             }
             return View(model);
         }
+        // 7. GET: Confirmar Eliminación de Rol
+        [Authorize(Policy = "Permiso:Roles.Editar")]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var rol = await _context.Roles
+                .Include(r => r.RolPermisos)
+                .FirstOrDefaultAsync(m => m.IdRol == id);
+
+            if (rol == null) return NotFound();
+
+            // Protección para el rol Administrador
+            if (rol.NombreRol.ToLower() == "administrador")
+            {
+                TempData["Error"] = "El rol de Administrador no puede ser eliminado por seguridad del sistema.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(rol);
+        }
+
+        // 8. POST: Confirmar Eliminación de Rol
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = "Permiso:Roles.Editar")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var rol = await _context.Roles
+                .Include(r => r.RolPermisos)
+                .FirstOrDefaultAsync(r => r.IdRol == id);
+
+            if (rol != null)
+            {
+                // Doble validación en POST
+                if (rol.NombreRol.ToLower() == "administrador")
+                {
+                    TempData["Error"] = "No se puede eliminar el rol de Administrador.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                try
+                {
+                    _context.Roles.Remove(rol);
+                    await _context.SaveChangesAsync();
+                    TempData["Ok"] = "Rol eliminado exitosamente.";
+                }
+                catch (DbUpdateException)
+                {
+                    // Capturamos el error si hay usuarios que aún tienen este rol asignado (Restricción de FK en BD)
+                    TempData["Error"] = "No se puede eliminar este rol porque hay usuarios asignados a él. Debe cambiar el rol de dichos usuarios antes de borrarlo.";
+                }
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
