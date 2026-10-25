@@ -1,5 +1,6 @@
 using CG_Electronica.Web.Authorization;
 using CG_Electronica.Web.Data;
+using CG_Electronica.Web.Services; // NUEVO - Namespace de tus servicios
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,20 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
-// NUEVO - Autenticaci�n con cookies
+// --- INICIO REGISTRO DE SERVICIOS (LÓGICA DE NEGOCIO) ---
+
+// TODO: Registro de los servicios del Integrante 2 (Fase 2 - Inventario y Auditoría)
+// Cuando el Integrante 2 integre su rama, debe descomentar/agregar sus servicios aquí:
+// builder.Services.AddScoped<IServicioInventario, ServicioInventario>();
+// builder.Services.AddScoped<IServicioAuditoria, ServicioAuditoria>();
+
+// NUEVO - Registro de tu Servicio de Ventas (Fase 3 - Facturación)[cite: 7]
+builder.Services.AddScoped<IServicioVentas, ServicioVentas>();
+
+// --- FIN REGISTRO DE SERVICIOS ---
+
+
+// NUEVO - Autenticación con cookies[cite: 11]
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -25,7 +39,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.SlidingExpiration = true;
     });
 
-// NUEVO - Autorizaci�n con proveedor de pol�ticas din�mico
+// NUEVO - Autorización con proveedor de políticas dinámico[cite: 11]
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermisoPolicyProvider>();
 builder.Services.AddScoped<IAuthorizationHandler, PermisoHandler>();
@@ -37,7 +51,7 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.[cite: 11]
     app.UseHsts();
 }
 
