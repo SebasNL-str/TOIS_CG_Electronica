@@ -1,0 +1,37 @@
+﻿@model CG_Electronica.Web.Models.ViewModels.UsuarioViewModel
+
+@{
+    ViewData["Title"] = "Crear Usuario";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-person-plus"></i> Crear Nuevo Usuario</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <!-- Inyectamos el formulario parcial -->
+                    <partial name="_Formulario" model="Model" />
+
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save"></i> Guardar
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        // Esto habilita las validaciones unobtrusive (incluyendo el [Remote] para que valide sin recargar)
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
