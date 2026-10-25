@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     {
     }
 
+    // --- DbSets Integrante 1 (Seguridad y Base) ---
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<Rol> Roles => Set<Rol>();
     public DbSet<Permiso> Permisos => Set<Permiso>();
@@ -20,10 +21,22 @@ public class AppDbContext : DbContext
     public DbSet<Categoria> Categorias => Set<Categoria>();
     public DbSet<Cliente> Clientes => Set<Cliente>();
 
+    // --- TODO: Integrante 2 debe agregar sus DbSets aquí ---
+    // public DbSet<ItemFacturable> ItemFacturables => Set<ItemFacturable>();
+    // public DbSet<Producto> Productos => Set<Producto>();
+    // public DbSet<Servicio> Servicios => Set<Servicio>();
+    // public DbSet<MovimientoInventario> MovimientosInventario => Set<MovimientoInventario>();
+    // public DbSet<Auditoria> Auditorias => Set<Auditoria>();
+
+    // --- DbSets Integrante 3 (Facturación y Ventas) ---
+    public DbSet<Factura> Facturas => Set<Factura>();
+    public DbSet<DetalleFactura> DetallesFactura => Set<DetalleFactura>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
+        // --- INICIO CONFIGURACIÓN INTEGRANTE 1 ---
         // Clave compuesta de la tabla intermedia N:N
         modelBuilder.Entity<RolPermiso>()
             .HasKey(rp => new { rp.IdRol, rp.IdPermiso });
@@ -72,7 +85,7 @@ public class AppDbContext : DbContext
             .HasIndex(c => c.Cedula)
             .IsUnique();
 
-        // Nombres de tablas en español, tal como en tu script
+        // Nombres de tablas en español
         modelBuilder.Entity<Usuario>().ToTable("USUARIO");
         modelBuilder.Entity<Rol>().ToTable("ROL");
         modelBuilder.Entity<Permiso>().ToTable("PERMISO");
@@ -80,5 +93,30 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Marca>().ToTable("MARCA");
         modelBuilder.Entity<Categoria>().ToTable("CATEGORIA");
         modelBuilder.Entity<Cliente>().ToTable("CLIENTE");
+        // --- FIN CONFIGURACIÓN INTEGRANTE 1 ---
+
+
+        // --- INICIO CONFIGURACIÓN INTEGRANTE 3 ---
+        // Unicidad del número de factura[cite: 5, 6]
+        modelBuilder.Entity<Factura>()
+            .HasIndex(f => f.NumeroFactura)
+            .IsUnique();
+
+        // Unicidad compuesta: un mismo item no puede repetirse en líneas distintas de la misma factura[cite: 5, 6]
+        modelBuilder.Entity<DetalleFactura>()
+            .HasIndex(d => new { d.IdFactura, d.IdItem })
+            .IsUnique();
+
+        // Composición Factura -> DetalleFactura (Borrado en cascada configurado a restricción por seguridad contable)
+        modelBuilder.Entity<Factura>()
+            .HasMany(f => f.Detalles)
+            .WithOne(d => d.Factura)
+            .HasForeignKey(d => d.IdFactura)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Nombres de tablas en español (siguiendo el estándar)[cite: 13]
+        modelBuilder.Entity<Factura>().ToTable("FACTURA");
+        modelBuilder.Entity<DetalleFactura>().ToTable("DETALLEFACTURA");
+        // --- FIN CONFIGURACIÓN INTEGRANTE 3 ---
     }
 }
