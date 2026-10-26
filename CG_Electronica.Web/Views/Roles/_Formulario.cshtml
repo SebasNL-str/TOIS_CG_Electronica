@@ -14,10 +14,21 @@
     <span asp-validation-for="Descripcion" class="text-danger"></span>
 </div>
 
+<div class="mb-3">
+    <label asp-for="Estado" class="form-label fw-bold"></label>
+    <select asp-for="Estado" class="form-select">
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+    </select>
+    <span asp-validation-for="Estado" class="text-danger"></span>
+</div>
+
 <h5 class="mt-4 text-primary"><i class="bi bi-shield-check"></i> Asignación de Permisos</h5>
 <hr class="mt-1 mb-3" />
 
+
 <div class="row">
+
     @for (int i = 0; i < Model.Permisos.Count; i++)
     {
         <div class="col-md-6 mb-3">

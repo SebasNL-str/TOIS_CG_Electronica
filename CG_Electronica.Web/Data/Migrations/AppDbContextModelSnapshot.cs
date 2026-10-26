@@ -142,6 +142,10 @@ namespace CG_Electronica.Web.Data.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("NombreRol")
                         .IsRequired()
                         .HasMaxLength(100)

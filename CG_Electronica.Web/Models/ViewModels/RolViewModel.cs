@@ -18,6 +18,10 @@ namespace CG_Electronica.Web.Models.ViewModels
         [Display(Name = "Descripción")]
         public string? Descripcion { get; set; }
 
+        [Required(ErrorMessage = "El estado es obligatorio.")]
+        [Display(Name = "Estado")]
+        public string Estado { get; set; } = "Activo";
+
         // Lista para manejar los checkboxes en la vista
         public List<PermisoCheckboxViewModel> Permisos { get; set; } = new List<PermisoCheckboxViewModel>();
     }
@@ -29,5 +33,7 @@ namespace CG_Electronica.Web.Models.ViewModels
         public string NombrePermiso { get; set; } = null!;
         public string? Descripcion { get; set; }
         public bool Seleccionado { get; set; }
+
+      
     }
 }
