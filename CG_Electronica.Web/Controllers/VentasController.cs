@@ -2,12 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using CG_Electronica.Web.Services; // Ajusta según tu carpeta de servicios
-using CG_Electronica.Web.Models.DTOs; // Ajusta según tu carpeta de DTOs
+using CG_Electronica.Web.Models.ViewModels;// Ajusta según tu carpeta de ViewModels
 
 namespace CG_Electronica.Web.Controllers
 {
     // OBLIGATORIO: Protege todo el controlador para que solo entren usuarios logueados
-    [Authorize] 
+    [Authorize]
     public class VentasController : Controller
     {
         private readonly IServicioVentas _servicioVentas;
@@ -35,7 +35,7 @@ namespace CG_Electronica.Web.Controllers
                 // === LECTURA DEL USUARIO ACTIVO ===
                 // Buscamos exactamente el ClaimTypes.NameIdentifier que el Integrante 1 guardó en el AccountController
                 var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                
+
                 // Intentamos parsear el string del Claim a int (ya que Usuario.IdUsuario es int)
                 if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int idUsuario))
                 {
@@ -44,7 +44,7 @@ namespace CG_Electronica.Web.Controllers
 
                 // Ahora sí, inyectamos el idUsuario 100% real al servicio transaccional
                 var factura = await _servicioVentas.RegistrarVentaAsync(request, idUsuario);
-                
+
                 return Json(new { success = true, facturaId = factura.IdFactura, mensaje = "Venta registrada con éxito." });
             }
             catch (Exception ex)
