@@ -1,36 +1,67 @@
 ﻿@model CG_Electronica.Web.Models.ViewModels.LoginViewModel
+
 @{
-    ViewData["Title"] = "Iniciar sesión";
+    ViewData["Title"] = "Iniciar Sesión";
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-4">
-        <div class="card shadow">
-            <div class="card-body">
-                <h4 class="card-title text-center mb-4">C&G Electrónica</h4>
-                <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="row justify-content-center align-items-center" style="min-height: 75vh;">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0 rounded-4">
 
+            <!-- Cabecera de la tarjeta con branding de la tienda -->
+            <div class="card-header bg-dark text-white text-center py-4 rounded-top-4">
+                <h3 class="mb-1"><i class="bi bi-phone-fill text-primary"></i> C&G Electrónica</h3>
+                <p class="text-white-50 small mb-0">Acceso al Sistema de Gestión</p>
+            </div>
+
+            <div class="card-body p-4 p-sm-5">
+
+                <!-- Alerta de error global si las credenciales fallan -->
+                @if (ViewData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i> @ViewData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <form asp-action="Login" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <!-- Usuario -->
                     <div class="mb-3">
-                        <label asp-for="NombreUsuario" class="form-label"></label>
-                        <input asp-for="NombreUsuario" class="form-control" />
-                        <span asp-validation-for="NombreUsuario" class="text-danger"></span>
+                        <label asp-for="NombreUsuario" class="form-label fw-bold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                            <input asp-for="NombreUsuario" class="form-control" placeholder="Ingrese su usuario" autocomplete="username" autofocus />
+                        </div>
+                        <span asp-validation-for="NombreUsuario" class="text-danger small"></span>
                     </div>
 
+                    <!-- Contraseña -->
                     <div class="mb-3">
-                        <label asp-for="Contrasena" class="form-label"></label>
-                        <input asp-for="Contrasena" class="form-control" />
-                        <span asp-validation-for="Contrasena" class="text-danger"></span>
+                        <label asp-for="Contrasena" class="form-label fw-bold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                            <input asp-for="Contrasena" class="form-control" placeholder="Ingrese su contraseña" autocomplete="current-password" />
+                        </div>
+                        <span asp-validation-for="Contrasena" class="text-danger small"></span>
                     </div>
 
-                    <div class="form-check mb-3">
-                        <input asp-for="Recordarme" class="form-check-input" />
-                        <label asp-for="Recordarme" class="form-check-label"></label>
+                    <!-- Botón de Iniciar Sesión -->
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                            <i class="bi bi-box-arrow-in-right"></i> Entrar al Sistema
+                        </button>
                     </div>
-
-                    <button type="submit" class="btn btn-primary w-100">Ingresar</button>
                 </form>
             </div>
+
+            <!-- Pie de tarjeta -->
+            <div class="card-footer text-center bg-light py-3 rounded-bottom-4">
+                <small class="text-muted">C&G Electrónica &copy; @DateTime.Now.Year - Todos los derechos reservados</small>
+            </div>
+
         </div>
     </div>
 </div>
