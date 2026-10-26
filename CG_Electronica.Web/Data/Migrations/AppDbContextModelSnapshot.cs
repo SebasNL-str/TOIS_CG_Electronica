@@ -90,8 +90,7 @@ namespace CG_Electronica.Web.Data.Migrations
 
                     b.Property<string>("Estado")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NombreMarca")
                         .IsRequired()

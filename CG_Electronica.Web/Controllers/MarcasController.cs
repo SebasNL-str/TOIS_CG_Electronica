@@ -88,17 +88,22 @@ public class MarcasController : Controller
     }
 
     [HttpPost, ActionName("Delete")]
-    [Authorize(Policy = "Permiso:Catalogos.Editar")]
     [ValidateAntiForgeryToken]
+    [Authorize(Policy = "Permiso:Catalogos.Editar")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
         var marca = await _context.Marcas.FindAsync(id);
         if (marca != null)
         {
-            _context.Marcas.Remove(marca);
+            // BORRADO LÓGICO: Cambiamos el estado a Inactivo en lugar de _context.Remove(marca)
+            marca.Estado = "Inactivo";
+
+            _context.Update(marca);
             await _context.SaveChangesAsync();
-            TempData["Ok"] = "Marca eliminada correctamente.";
+
+            TempData["Ok"] = "Marca inactivada correctamente.";
         }
+
         return RedirectToAction(nameof(Index));
     }
 }
