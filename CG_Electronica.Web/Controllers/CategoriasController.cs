@@ -20,6 +20,19 @@ public class CategoriasController : Controller
     [Authorize(Policy = "Permiso:Catalogos.Editar")]
     public IActionResult Create() => View(new CategoriaViewModel());
 
+    // Validación Remota (GET) para verificar que el nombre de la categoría no se repita
+    [HttpGet]
+    public async Task<IActionResult> VerificarNombreCategoria(string nombreCategoria, int idCategoria)
+    {
+        var existe = await _context.Categorias
+            .AnyAsync(c => c.NombreCategoria.ToLower() == nombreCategoria.ToLower() && c.IdCategoria != idCategoria);
+
+        if (existe)
+            return Json($"La categoría '{nombreCategoria}' ya está registrada.");
+
+        return Json(true);
+    }
+
     [HttpPost]
     [Authorize(Policy = "Permiso:Catalogos.Editar")]
     [ValidateAntiForgeryToken]

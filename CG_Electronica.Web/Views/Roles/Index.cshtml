@@ -32,17 +32,17 @@
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <table class="table table-hover table-striped">
+        <table class="table table-hover table-striped align-middle">
             <thead class="table-dark">
                 <tr>
                     <th>Nombre del Rol</th>
                     <th>Descripción</th>
                     <th class="text-center">Permisos Asignados</th>
+                    <th>Estado</th>
                     @if (User.TienePermiso("Roles.Editar"))
                     {
                         <th class="text-end">Acciones</th>
                     }
-                    <th>Estado</th>
                 </tr>
             </thead>
             <tbody>
@@ -56,17 +56,6 @@
                                 @(item.RolPermisos?.Count ?? 0) permisos
                             </span>
                         </td>
-                        @if (User.TienePermiso("Roles.Editar"))
-                        {
-                            <td class="text-end">
-                                <a asp-action="Edit" asp-route-id="@item.IdRol" class="btn btn-sm btn-warning">Editar</a>
-                                <!-- Proteger visualmente el rol Administrador -->
-                                @if (item.NombreRol.ToLower() != "administrador")
-                                {
-                                    <a asp-action="Delete" asp-route-id="@item.IdRol" class="btn btn-sm btn-danger">Eliminar</a>
-                                }
-                            </td>
-                        }
                         <td>
                             @if (item.Estado == "Activo")
                             {
@@ -77,6 +66,16 @@
                                 <span class="badge bg-secondary">Inactivo</span>
                             }
                         </td>
+                        @if (User.TienePermiso("Roles.Editar"))
+                        {
+                            <td class="text-end">
+                                <a asp-action="Edit" asp-route-id="@item.IdRol" class="btn btn-sm btn-warning">Editar</a>
+                                @if (item.Estado == "Activo" && item.NombreRol.ToLower() != "administrador")
+                                {
+                                    <a asp-action="Delete" asp-route-id="@item.IdRol" class="btn btn-sm btn-danger">Eliminar</a>
+                                }
+                            </td>
+                        }
                     </tr>
                 }
             </tbody>
