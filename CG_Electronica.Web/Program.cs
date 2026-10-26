@@ -1,6 +1,6 @@
 using CG_Electronica.Web.Authorization;
 using CG_Electronica.Web.Data;
-using CG_Electronica.Web.Services; // NUEVO - Namespace de tus servicios
+//using CG_Electronica.Web.Services; // NUEVO - Namespace de tus servicios
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +23,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // builder.Services.AddScoped<IServicioAuditoria, ServicioAuditoria>();
 
 // NUEVO - Registro de tu Servicio de Ventas (Fase 3 - Facturación)[cite: 7]
-builder.Services.AddScoped<IServicioVentas, ServicioVentas>();
+//builder.Services.AddScoped<IServicioVentas, ServicioVentas>();
 
 // --- FIN REGISTRO DE SERVICIOS ---
 

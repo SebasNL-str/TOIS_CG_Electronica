@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+/*using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CG_Electronica.Web.Models
@@ -21,10 +21,11 @@ namespace CG_Electronica.Web.Models
         public int IdFactura { get; set; }
         [ForeignKey("IdFactura")]
         public Factura Factura { get; set; } = null!;
-
+        
         [Required]
         public int IdItem { get; set; }
         [ForeignKey("IdItem")]
-        public ItemFacturable Item { get; set; } = null!; // Creado por Integrante 2[cite: 6]
+        public ItemFacturable Item { get; set; } = null!; // Creado por Integrante 2
     }
 }
+*/

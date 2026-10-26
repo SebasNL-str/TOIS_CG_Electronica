@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -17,16 +17,16 @@ namespace CG_Electronica.Web.Services
     public class ServicioVentas : IServicioVentas
     {
         private readonly AppDbContext _context;
-        private readonly IServicioInventario _servicioInventario; // Interface del Integrante 2
-        private readonly IServicioAuditoria _servicioAuditoria;   // Interface del Integrante 2
+        //private readonly IServicioInventario _servicioInventario; // Interface del Integrante 2
+        //private readonly IServicioAuditoria _servicioAuditoria;   // Interface del Integrante 2
 
-        public ServicioVentas(AppDbContext context, IServicioInventario servicioInventario, IServicioAuditoria servicioAuditoria)
+        /*public ServicioVentas(AppDbContext context, IServicioInventario servicioInventario, IServicioAuditoria servicioAuditoria)
         {
             _context = context;
             _servicioInventario = servicioInventario;
             _servicioAuditoria = servicioAuditoria;
         }
-
+        
         public async Task<Factura> RegistrarVentaAsync(VentaRequestDTO request, int idUsuario)
         {
             // Valida que la factura contenga al menos un detalle[cite: 6]
@@ -162,3 +162,4 @@ namespace CG_Electronica.Web.Services
         }
     }
 }
+*/

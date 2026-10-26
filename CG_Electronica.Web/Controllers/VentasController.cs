@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+/*using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using CG_Electronica.Web.Services; // Ajusta según tu carpeta de servicios
@@ -55,3 +55,4 @@ namespace CG_Electronica.Web.Controllers
         }
     }
 }
+*/

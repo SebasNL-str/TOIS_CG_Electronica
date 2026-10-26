@@ -28,10 +28,10 @@ public class AppDbContext : DbContext
     // public DbSet<MovimientoInventario> MovimientosInventario => Set<MovimientoInventario>();
     // public DbSet<Auditoria> Auditorias => Set<Auditoria>();
 
-    // --- DbSets Integrante 3 (Facturación y Ventas) ---
+   /* // --- DbSets Integrante 3 (Facturación y Ventas) ---
     public DbSet<Factura> Facturas => Set<Factura>();
     public DbSet<DetalleFactura> DetallesFactura => Set<DetalleFactura>();
-
+   */
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -95,7 +95,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Cliente>().ToTable("CLIENTE");
         // --- FIN CONFIGURACIÓN INTEGRANTE 1 ---
 
-
+        /*
         // --- INICIO CONFIGURACIÓN INTEGRANTE 3 ---
         // Unicidad del número de factura[cite: 5, 6]
         modelBuilder.Entity<Factura>()
@@ -118,5 +118,6 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Factura>().ToTable("FACTURA");
         modelBuilder.Entity<DetalleFactura>().ToTable("DETALLEFACTURA");
         // --- FIN CONFIGURACIÓN INTEGRANTE 3 ---
+        */
     }
 }

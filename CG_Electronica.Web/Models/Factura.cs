@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -58,3 +58,4 @@ namespace CG_Electronica.Web.Models
         public ICollection<DetalleFactura> Detalles { get; set; } = new List<DetalleFactura>();
     }
 }
+*/
