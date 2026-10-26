@@ -42,6 +42,7 @@
                     {
                         <th class="text-end">Acciones</th>
                     }
+                    <th>Estado</th>
                 </tr>
             </thead>
             <tbody>
@@ -64,6 +65,17 @@
                                 }
                             </td>
                         }
+
+                        <td>
+                            @if (item.Estado == "Activo")
+                            {
+                                <span class="badge bg-success">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactivo</span>
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>

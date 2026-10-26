@@ -21,4 +21,6 @@ public class Usuario
 
     public int IdRol { get; set; }
     public Rol Rol { get; set; } = null!;
+
+    public string Estado { get; set; } = "Activo";
 }

@@ -26,5 +26,10 @@ namespace CG_Electronica.Web.Models.ViewModels
         [Required(ErrorMessage = "El rol es obligatorio.")]
         [Display(Name = "Rol")]
         public int IdRol { get; set; }
+
+        // NUEVO: Estado
+        [Required(ErrorMessage = "El estado es obligatorio.")]
+        [Display(Name = "Estado")]
+        public string Estado { get; set; } = "Activo";
     }
 }

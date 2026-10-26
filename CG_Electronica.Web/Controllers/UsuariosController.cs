@@ -100,7 +100,7 @@ namespace CG_Electronica.Web.Controllers
             return View(model);
         }
 
-        // 4. GET: Formulario de Edición
+        // GET: Edit
         [Authorize(Policy = "Permiso:Usuarios.Editar")]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -109,21 +109,20 @@ namespace CG_Electronica.Web.Controllers
             var usuario = await _context.Usuarios.FindAsync(id);
             if (usuario == null) return NotFound();
 
-            // Mapeamos los datos al ViewModel. 
-            // OJO: Dejamos "Clave" vacío por seguridad, no enviamos el hash a la vista.
             var model = new Models.ViewModels.UsuarioViewModel
             {
                 IdUsuario = usuario.IdUsuario,
                 Nombre = usuario.Nombre,
                 NombreUsuario = usuario.NombreUsuario,
-                IdRol = usuario.IdRol
+                IdRol = usuario.IdRol,
+                Estado = usuario.Estado // <--- Mapeamos el estado
             };
 
             ViewBag.Roles = new SelectList(await _context.Roles.ToListAsync(), "IdRol", "NombreRol", model.IdRol);
             return View(model);
         }
 
-        // 5. POST: Guardar Edición
+        // POST: Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "Permiso:Usuarios.Editar")]
@@ -133,7 +132,6 @@ namespace CG_Electronica.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                // Validar unicidad de NombreUsuario (excluyendo el usuario actual)
                 bool existe = await _context.Usuarios
                     .AnyAsync(u => u.NombreUsuario.ToLower() == model.NombreUsuario.ToLower() && u.IdUsuario != id);
 
@@ -146,12 +144,19 @@ namespace CG_Electronica.Web.Controllers
                     var usuarioDb = await _context.Usuarios.FindAsync(id);
                     if (usuarioDb == null) return NotFound();
 
-                    // Actualizamos los campos de texto
+                    // Protección: No permitir inactivar al admin principal
+                    if (usuarioDb.NombreUsuario.ToLower() == "admin" && model.Estado != "Activo")
+                    {
+                        ModelState.AddModelError("Estado", "El usuario administrador principal no puede ser inactivado.");
+                        ViewBag.Roles = new SelectList(await _context.Roles.ToListAsync(), "IdRol", "NombreRol", model.IdRol);
+                        return View(model);
+                    }
+
                     usuarioDb.Nombre = model.Nombre;
                     usuarioDb.NombreUsuario = model.NombreUsuario;
                     usuarioDb.IdRol = model.IdRol;
+                    usuarioDb.Estado = model.Estado; // <--- Guardamos el estado
 
-                    // SOLO actualizamos la contraseña si el usuario escribió una nueva
                     if (!string.IsNullOrEmpty(model.Clave))
                     {
                         var hasher = new PasswordHasher<Usuario>();
@@ -165,10 +170,10 @@ namespace CG_Electronica.Web.Controllers
                     return RedirectToAction(nameof(Index));
                 }
             }
-
             ViewBag.Roles = new SelectList(await _context.Roles.ToListAsync(), "IdRol", "NombreRol", model.IdRol);
             return View(model);
         }
+
 
         // 6. GET: Confirmar Eliminación
         [Authorize(Policy = "Permiso:Usuarios.Editar")]
@@ -192,7 +197,7 @@ namespace CG_Electronica.Web.Controllers
             return View(usuario);
         }
 
-        // 7. POST: Confirmar Eliminación
+        // POST: Delete (BORRADO LÓGICO / INACTIVACIÓN)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "Permiso:Usuarios.Editar")]
@@ -203,21 +208,17 @@ namespace CG_Electronica.Web.Controllers
             {
                 if (usuario.NombreUsuario.ToLower() == "admin")
                 {
-                    TempData["Error"] = "No está permitido eliminar al administrador principal.";
+                    TempData["Error"] = "No se puede inactivar al administrador principal.";
                     return RedirectToAction(nameof(Index));
                 }
 
-                try
-                {
-                    _context.Usuarios.Remove(usuario);
-                    await _context.SaveChangesAsync();
-                    TempData["Ok"] = "Usuario eliminado exitosamente.";
-                }
-                catch (DbUpdateException)
-                {
-                    // Capturamos el error si el usuario ya tiene Facturas, Auditorias o Movimientos asociados
-                    TempData["Error"] = "No se puede eliminar este usuario porque tiene registros de historial asociados (ventas, movimientos, etc.).";
-                }
+                // BORRADO LÓGICO: Cambiamos estado a Inactivo
+                usuario.Estado = "Inactivo";
+
+                _context.Update(usuario);
+                await _context.SaveChangesAsync();
+
+                TempData["Ok"] = "Usuario inactivado correctamente.";
             }
 
             return RedirectToAction(nameof(Index));
