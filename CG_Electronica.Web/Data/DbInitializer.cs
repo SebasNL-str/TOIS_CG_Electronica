@@ -8,7 +8,6 @@ public static class DbInitializer
 {
     public static void Seed(AppDbContext context)
     {
-        context.Database.Migrate();
         var hasher = new PasswordHasher<Usuario>();
 
         // ---------- PERMISOS (solo si no existen) ----------
@@ -65,6 +64,7 @@ public static class DbInitializer
             {
                 Nombre = "Administrador del Sistema",
                 NombreUsuario = "admin",
+                Estado = "Activo",
                 IdRol = rolAdmin.IdRol
             };
             admin.Contrasena = hasher.HashPassword(admin, "Admin123!");

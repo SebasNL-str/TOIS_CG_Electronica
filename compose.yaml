@@ -1,0 +1,35 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: cg_electronica_sql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: ${MSSQL_PID:-Developer}
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Define MSSQL_SA_PASSWORD en .env}
+      MSSQL_MEMORY_LIMIT_MB: "3072"
+    mem_limit: 4g
+    ports:
+      - "127.0.0.1:${SQL_PORT:-1433}:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./database:/scripts:ro
+    restart: unless-stopped
+
+  web:
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    working_dir: /src
+    command: dotnet run --no-launch-profile --project CG_Electronica.Web/CG_Electronica.Web.csproj
+    environment:
+      ASPNETCORE_URLS: http://0.0.0.0:5007
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=CG_Electronica;User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=True;TrustServerCertificate=True;"
+    ports:
+      - "5007:5007"
+    volumes:
+      - .:/src
+    depends_on:
+      - db
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:
+

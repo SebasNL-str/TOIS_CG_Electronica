@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace CG_Electronica.Web.Models;
 
@@ -19,6 +19,11 @@ public class Usuario
     [StringLength(255)]
     public string Contrasena { get; set; } = string.Empty;
 
+    [Required]
+    [StringLength(30)]
+    public string Estado { get; set; } = "Activo";
+
     public int IdRol { get; set; }
+
     public Rol Rol { get; set; } = null!;
 }
