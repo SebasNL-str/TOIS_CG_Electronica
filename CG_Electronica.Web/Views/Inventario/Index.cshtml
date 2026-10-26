@@ -1,0 +1,82 @@
+@model IEnumerable<CG_Electronica.Web.Models.MovimientoInventario>
+
+@{
+    ViewData["Title"] = "Kardex de Inventario";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Kardex e Historial de Movimientos</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+        <li class="breadcrumb-item active">Inventario</li>
+    </ol>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Mensaje"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div><i class="fas fa-exchange-alt me-1"></i> Movimientos Registrados</div>
+            <a asp-action="RegistrarMovimiento" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus-circle"></i> Registrar Movimiento Manual
+            </a>
+        </div>
+        <div class="card-body">
+            <!-- Formulario de Filtro por Producto -->
+            <form method="get" class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Filtrar por Producto:</label>
+                    <select name="idProducto" class="form-select" asp-items="ViewBag.Productos" onchange="this.form.submit()">
+                        <option value="">-- Todos los productos --</option>
+                    </select>
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Fecha y Hora</th>
+                            <th>Tipo</th>
+                            <th>Motivo</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Costo Unit.</th>
+                            <th>Usuario</th>
+                            <th>Observación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.FechaHora.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>
+                                    @if (item.TipoMovimiento == "Entrada")
+                                    {
+                                        <span class="badge bg-success">Entrada</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Salida</span>
+                                    }
+                                </td>
+                                <td>@item.Motivo</td>
+                                <td><strong>@item.Producto?.Descripcion</strong></td>
+                                <td>@item.Cantidad</td>
+                                <td>$@item.PrecioCompraUnitario.ToString("N2")</td>
+                                <td>@item.Usuario?.NombreUsuario</td>
+                                <td>@item.Observacion</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

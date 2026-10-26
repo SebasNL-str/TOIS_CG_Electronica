@@ -1,0 +1,89 @@
+@model IEnumerable<CG_Electronica.Web.Models.Producto>
+
+@{
+    ViewData["Title"] = "Gestión de Productos";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Productos</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+        <li class="breadcrumb-item active">Productos</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-box me-1"></i> Listado de Productos e Inventario
+            </div>
+            <a asp-action="Create" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Nuevo Producto
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Modelo / Código</th>
+                            <th>Marca / Categoría</th>
+                            <th>P. Compra</th>
+                            <th>P. Venta</th>
+                            <th>Stock</th>
+                            <th>Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td><strong>@item.Descripcion</strong></td>
+                                <div>
+                                    <td>
+                                        <small class="text-muted">Mod:</small> @(item.Modelo ?? "N/A")<br />
+                                        <small class="text-muted">Fab:</small> @(item.CodigoFabricante ?? "N/A")
+                                    </td>
+                                </div>
+                                <td>
+                                    <span class="badge bg-secondary">@item.Marca?.NombreMarca</span>
+                                    <span class="badge bg-info text-dark">@item.Categoria?.NombreCategoria</span>
+                                </td>
+                                <td>$@item.PrecioCompra.ToString("N2")</td>
+                                <td>$@item.PrecioVenta.ToString("N2")</td>
+                                <td>
+                                    @if (item.Existencias <= item.ExistenciasMinimas)
+                                    {
+                                        <span class="badge bg-danger" title="Stock bajo o igual al mínimo (@item.ExistenciasMinimas)">
+                                            @item.Existencias (Stock Bajo)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success">@item.Existencias</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Estado == "Activo")
+                                    {
+                                        <span class="badge bg-success">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">@item.Estado</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Edit" asp-route-id="@item.IdItem" class="btn btn-warning btn-sm" title="Editar">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

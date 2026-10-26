@@ -1,0 +1,104 @@
+@model CG_Electronica.Web.Models.ViewModels.ViewModelFacturaCreate
+
+@{
+    ViewData["Title"] = "Nueva Factura";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Registrar Nueva Factura</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-action="Index">Facturas</a></li>
+        <li class="breadcrumb-item active">Crear Venta</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-action="Create" id="formFactura">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label asp-for="NumeroFactura" class="form-label fw-bold">N° de Factura</label>
+                        <input asp-for="NumeroFactura" class="form-control" readonly />
+                    </div>
+                    <div class="col-md-8">
+                        <label asp-for="IdCliente" class="form-label fw-bold">Cliente</label>
+                        <select asp-for="IdCliente" class="form-select" asp-items="ViewBag.Clientes" required>
+                            <option value="">-- Seleccione un Cliente --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <hr />
+                <h5 class="text-primary mb-3">Detalle de Productos / Ítems</h5>
+
+                <div class="row g-3 align-items-end mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Seleccionar Producto</label>
+                        <select id="selectProducto" class="form-select" asp-items="ViewBag.Productos">
+                            <option value="">-- Seleccione Producto --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Cantidad</label>
+                        <input type="number" id="inputCantidad" class="form-control" value="1" min="1" />
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" id="btnAgregarItem" class="btn btn-success w-100">
+                            <i class="fas fa-plus"></i> Agregar a Factura
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered align-middle" id="tablaDetalles">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Producto</th>
+                                <th class="text-center" style="width: 120px;">Cantidad</th>
+                                <th class="text-end" style="width: 150px;">Subtotal</th>
+                                <th class="text-center" style="width: 100px;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Ítems agregados dinámicamente vía JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <div class="card bg-light p-3" style="width: 300px;">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Subtotal:</span>
+                            <strong id="lblSubtotal">$0.00</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>IVA (15%):</span>
+                            <strong id="lblIva">$0.00</strong>
+                        </div>
+                        <hr class="my-2" />
+                        <div class="d-flex justify-content-between">
+                            <span class="fs-5">Total:</span>
+                            <strong class="fs-5 text-success" id="lblTotal">$0.00</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save"></i> Emitir Factura</button>
+                    <a asp-action="Index" class="btn btn-secondary btn-lg">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let itemsFactura = [];
+
+        // Simulación básica para manejar los ítems en el front antes de enviar al backend
+        // (Nota: En un entorno de producción avanzado se puede consultar el precio unitario vía AJAX, 
+        // aquí podemos estructurarlo con los inputs del DOM o catálogos embebidos).
+    </script>
+}

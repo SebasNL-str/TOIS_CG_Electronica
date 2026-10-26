@@ -1,6 +1,6 @@
 using CG_Electronica.Web.Authorization;
 using CG_Electronica.Web.Data;
-//using CG_Electronica.Web.Services; // NUEVO - Namespace de tus servicios
+using CG_Electronica.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +43,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermisoPolicyProvider>();
 builder.Services.AddScoped<IAuthorizationHandler, PermisoHandler>();
+builder.Services.AddScoped<IServicioAuditoria, ServicioAuditoria>();
+builder.Services.AddScoped<IServicioInventario, ServicioInventario>();
 
 
 var app = builder.Build();

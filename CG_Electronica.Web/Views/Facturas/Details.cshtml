@@ -1,0 +1,83 @@
+@model CG_Electronica.Web.Models.Factura
+
+@{
+    ViewData["Title"] = $"Detalle Factura {Model.NumeroFactura}";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Factura N° @Model.NumeroFactura</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-action="Index">Facturas</a></li>
+        <li class="breadcrumb-item active">Detalle</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div><i class="fas id-card me-1"></i> Información General</div>
+            <div>
+                <span class="badge bg-success fs-6">@Model.Estado</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <p><strong>Fecha y Hora:</strong> @Model.Fecha.ToString("yyyy-MM-dd HH:mm:ss")</p>
+                    <p><strong>Usuario Emisor:</strong> @Model.Usuario?.NombreUsuario</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Cliente:</strong> @Model.NombreClienteHistorico</p>
+                    <p><strong>Cédula / RUC:</strong> @Model.CedulaClienteHistorica</p>
+                    <p><strong>Teléfono:</strong> @Model.TelefonoClienteHistorico</p>
+                </div>
+            </div>
+
+            <h5 class="text-primary mb-3">Productos Facturados</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Ítem</th>
+                            <th class="text-center">Cantidad</th>
+                            <th class="text-end">Precio Unitario Histórico</th>
+                            <th class="text-end">Subtotal Línea</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var det in Model.Detalles)
+                        {
+                            var subtotalLinea = det.Cantidad * det.PrecioUnitarioHistorico;
+                            <tr>
+                                <td>@det.Item?.GetType().Name - ID: @det.IdItem</td>
+                                <td class="text-center">@det.Cantidad</td>
+                                <td class="text-end">$@det.PrecioUnitarioHistorico.ToString("N2")</td>
+                                <td class="text-end">$@subtotalLinea.ToString("N2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-end mt-3">
+                <div class="card bg-light p-3" style="width: 300px;">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Subtotal:</span>
+                        <strong>$@Model.Subtotal.ToString("N2")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>IVA (15%):</span>
+                        <strong>$@Model.Iva.ToString("N2")</strong>
+                    </div>
+                    <hr class="my-2" />
+                    <div class="d-flex justify-content-between">
+                        <span class="fs-5">Total:</span>
+                        <strong class="fs-5 text-success">$@Model.Total.ToString("N2")</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver al Listado</a>
+            </div>
+        </div>
+    </div>
+</div>

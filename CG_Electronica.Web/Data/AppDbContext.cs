@@ -1,7 +1,5 @@
 ﻿using CG_Electronica.Web.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Reflection.Emit;
 
 namespace CG_Electronica.Web.Data;
 
@@ -12,32 +10,61 @@ public class AppDbContext : DbContext
     {
     }
 
-    // --- DbSets Integrante 1 (Seguridad y Base) ---
+    // =========================================================
+    // SEGURIDAD Y USUARIOS
+    // =========================================================
+
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<Rol> Roles => Set<Rol>();
     public DbSet<Permiso> Permisos => Set<Permiso>();
     public DbSet<RolPermiso> RolPermisos => Set<RolPermiso>();
+
+    // =========================================================
+    // CLIENTES Y CATÁLOGOS
+    // =========================================================
+
+    public DbSet<Cliente> Clientes => Set<Cliente>();
     public DbSet<Marca> Marcas => Set<Marca>();
     public DbSet<Categoria> Categorias => Set<Categoria>();
-    public DbSet<Cliente> Clientes => Set<Cliente>();
 
-    // --- TODO: Integrante 2 debe agregar sus DbSets aquí ---
-    // public DbSet<ItemFacturable> ItemFacturables => Set<ItemFacturable>();
-    // public DbSet<Producto> Productos => Set<Producto>();
-    // public DbSet<Servicio> Servicios => Set<Servicio>();
-    // public DbSet<MovimientoInventario> MovimientosInventario => Set<MovimientoInventario>();
-    // public DbSet<Auditoria> Auditorias => Set<Auditoria>();
+    // =========================================================
+    // INVENTARIO E ITEMS FACTURABLES
+    // =========================================================
 
-   /* // --- DbSets Integrante 3 (Facturación y Ventas) ---
+    public DbSet<ItemFacturable> ItemsFacturables => Set<ItemFacturable>();
+    public DbSet<Producto> Productos => Set<Producto>();
+    public DbSet<Servicio> Servicios => Set<Servicio>();
+    public DbSet<MovimientoInventario> MovimientosInventario => Set<MovimientoInventario>();
+    public DbSet<Auditoria> Auditorias => Set<Auditoria>();
+
+    // =========================================================
+    // FACTURACIÓN Y VENTAS
+    // =========================================================
+
     public DbSet<Factura> Facturas => Set<Factura>();
     public DbSet<DetalleFactura> DetallesFactura => Set<DetalleFactura>();
-   */
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // --- INICIO CONFIGURACIÓN INTEGRANTE 1 ---
-        // Clave compuesta de la tabla intermedia N:N
+        // =====================================================
+        // 1. SEGURIDAD Y USUARIOS
+        // =====================================================
+
+        modelBuilder.Entity<Usuario>()
+            .ToTable("USUARIO");
+
+        modelBuilder.Entity<Rol>()
+            .ToTable("ROL");
+
+        modelBuilder.Entity<Permiso>()
+            .ToTable("PERMISO");
+
+        modelBuilder.Entity<RolPermiso>()
+            .ToTable("ROL_PERMISO");
+
+        // Clave compuesta de la relación N:N entre roles y permisos.
         modelBuilder.Entity<RolPermiso>()
             .HasKey(rp => new { rp.IdRol, rp.IdPermiso });
 
@@ -53,14 +80,14 @@ public class AppDbContext : DbContext
             .HasForeignKey(rp => rp.IdPermiso)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // USUARIO -> ROL (sin cascada, igual que en tu script T-SQL)
+        // Usuario -> Rol: restringe la eliminación de roles con usuarios.
         modelBuilder.Entity<Usuario>()
             .HasOne(u => u.Rol)
             .WithMany(r => r.Usuarios)
             .HasForeignKey(u => u.IdRol)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Restricciones de unicidad (Paso 1 del .md)
+        // Índices únicos de seguridad.
         modelBuilder.Entity<Usuario>()
             .HasIndex(u => u.NombreUsuario)
             .IsUnique();
@@ -73,6 +100,23 @@ public class AppDbContext : DbContext
             .HasIndex(p => p.NombrePermiso)
             .IsUnique();
 
+        // =====================================================
+        // 2. CLIENTES Y CATÁLOGOS
+        // =====================================================
+
+        modelBuilder.Entity<Cliente>()
+            .ToTable("CLIENTE");
+
+        modelBuilder.Entity<Marca>()
+            .ToTable("MARCA");
+
+        modelBuilder.Entity<Categoria>()
+            .ToTable("CATEGORIA");
+
+        modelBuilder.Entity<Cliente>()
+            .HasIndex(c => c.Cedula)
+            .IsUnique();
+
         modelBuilder.Entity<Marca>()
             .HasIndex(m => m.NombreMarca)
             .IsUnique();
@@ -81,43 +125,214 @@ public class AppDbContext : DbContext
             .HasIndex(c => c.NombreCategoria)
             .IsUnique();
 
-        modelBuilder.Entity<Cliente>()
-            .HasIndex(c => c.Cedula)
-            .IsUnique();
+        // =====================================================
+        // 3. HERENCIA TPT: ITEMFACTURABLE, PRODUCTO Y SERVICIO
+        // =====================================================
 
-        // Nombres de tablas en español
-        modelBuilder.Entity<Usuario>().ToTable("USUARIO");
-        modelBuilder.Entity<Rol>().ToTable("ROL");
-        modelBuilder.Entity<Permiso>().ToTable("PERMISO");
-        modelBuilder.Entity<RolPermiso>().ToTable("ROL_PERMISO");
-        modelBuilder.Entity<Marca>().ToTable("MARCA");
-        modelBuilder.Entity<Categoria>().ToTable("CATEGORIA");
-        modelBuilder.Entity<Cliente>().ToTable("CLIENTE");
-        // --- FIN CONFIGURACIÓN INTEGRANTE 1 ---
+        // Entidad base.
+        modelBuilder.Entity<ItemFacturable>()
+            .ToTable("ITEMFACTURABLE")
+            .HasKey(i => i.IdItem);
 
-        /*
-        // --- INICIO CONFIGURACIÓN INTEGRANTE 3 ---
-        // Unicidad del número de factura[cite: 5, 6]
+        modelBuilder.Entity<ItemFacturable>()
+            .Property(i => i.IdItem)
+            .HasColumnName("idItem");
+
+        modelBuilder.Entity<ItemFacturable>()
+            .Property(i => i.PrecioVenta)
+            .HasColumnName("precioVenta")
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<ItemFacturable>()
+            .Property(i => i.Estado)
+            .HasColumnName("estado");
+
+        // -----------------------------------------------------
+        // PRODUCTO
+        // -----------------------------------------------------
+
+        modelBuilder.Entity<Producto>()
+            .ToTable("PRODUCTO")
+            .HasBaseType<ItemFacturable>();
+
+        modelBuilder.Entity<Producto>()
+            .Property(p => p.Descripcion)
+            .HasColumnName("descripcion");
+
+        modelBuilder.Entity<Producto>()
+            .Property(p => p.Modelo)
+            .HasColumnName("modelo");
+
+        modelBuilder.Entity<Producto>()
+            .Property(p => p.CodigoFabricante)
+            .HasColumnName("codigoFabricante");
+
+        modelBuilder.Entity<Producto>()
+            .Property(p => p.PrecioCompra)
+            .HasColumnName("precioCompra")
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Producto>()
+            .Property(p => p.Existencias)
+            .HasColumnName("existencias");
+
+        modelBuilder.Entity<Producto>()
+            .Property(p => p.ExistenciasMinimas)
+            .HasColumnName("existenciasMinimas");
+
+        modelBuilder.Entity<Producto>()
+            .Property(p => p.IdMarca)
+            .HasColumnName("idMarca");
+
+        modelBuilder.Entity<Producto>()
+            .Property(p => p.IdCategoria)
+            .HasColumnName("idCategoria");
+
+        // Relaciones explícitas: Producto -> Marca y Producto -> Categoria.
+        modelBuilder.Entity<Producto>()
+            .HasOne(p => p.Marca)
+            .WithMany()
+            .HasForeignKey(p => p.IdMarca);
+
+        modelBuilder.Entity<Producto>()
+            .HasOne(p => p.Categoria)
+            .WithMany()
+            .HasForeignKey(p => p.IdCategoria);
+
+        // -----------------------------------------------------
+        // SERVICIO
+        // -----------------------------------------------------
+
+        modelBuilder.Entity<Servicio>()
+            .ToTable("SERVICIO")
+            .HasBaseType<ItemFacturable>();
+
+        modelBuilder.Entity<Servicio>()
+            .Property(s => s.NombreServicio)
+            .HasColumnName("nombreServicio");
+
+        // =====================================================
+        // 4. MOVIMIENTOS DE INVENTARIO
+        // =====================================================
+
+        modelBuilder.Entity<MovimientoInventario>()
+            .ToTable("MOVIMIENTOINVENTARIO")
+            .HasKey(m => m.IdMovimiento);
+
+        modelBuilder.Entity<MovimientoInventario>()
+            .Property(m => m.IdMovimiento)
+            .HasColumnName("idMovimiento");
+
+        modelBuilder.Entity<MovimientoInventario>()
+            .Property(m => m.PrecioCompraUnitario)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<MovimientoInventario>()
+            .HasOne(m => m.Producto)
+            .WithMany(p => p.Movimientos)
+            .HasForeignKey(m => m.IdProducto)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<MovimientoInventario>()
+            .HasOne(m => m.Usuario)
+            .WithMany()
+            .HasForeignKey(m => m.IdUsuario)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // =====================================================
+        // 5. AUDITORÍA
+        // =====================================================
+
+        modelBuilder.Entity<Auditoria>()
+            .ToTable("AUDITORIA")
+            .HasKey(a => a.IdAuditoria);
+
+        modelBuilder.Entity<Auditoria>()
+            .Property(a => a.IdAuditoria)
+            .HasColumnName("idAuditoria");
+
+        modelBuilder.Entity<Auditoria>()
+            .HasOne(a => a.Usuario)
+            .WithMany()
+            .HasForeignKey(a => a.IdUsuario)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // =====================================================
+        // 6. FACTURACIÓN
+        // =====================================================
+
+        modelBuilder.Entity<Factura>()
+            .ToTable("FACTURA")
+            .HasKey(f => f.IdFactura);
+
+        modelBuilder.Entity<Factura>()
+            .Property(f => f.IdFactura)
+            .HasColumnName("idFactura");
+
+        modelBuilder.Entity<Factura>()
+            .Property(f => f.Iva)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Factura>()
+            .Property(f => f.Subtotal)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Factura>()
+            .Property(f => f.Total)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Factura>()
+            .HasOne(f => f.Usuario)
+            .WithMany()
+            .HasForeignKey(f => f.IdUsuario)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Factura>()
+            .HasOne(f => f.Cliente)
+            .WithMany()
+            .HasForeignKey(f => f.IdCliente)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Unicidad del número de factura.
         modelBuilder.Entity<Factura>()
             .HasIndex(f => f.NumeroFactura)
             .IsUnique();
 
-        // Unicidad compuesta: un mismo item no puede repetirse en líneas distintas de la misma factura[cite: 5, 6]
+        // =====================================================
+        // 7. DETALLES DE FACTURA
+        // =====================================================
+
+        modelBuilder.Entity<DetalleFactura>()
+            .ToTable("DETALLEFACTURA")
+            .HasKey(d => d.IdDetalle);
+
+        modelBuilder.Entity<DetalleFactura>()
+            .Property(d => d.IdDetalle)
+            .HasColumnName("idDetalle");
+
+        modelBuilder.Entity<DetalleFactura>()
+            .Property(d => d.PrecioUnitarioHistorico)
+            .HasPrecision(18, 2);
+
+        // Un mismo item no puede repetirse en varias líneas
+        // de una misma factura.
         modelBuilder.Entity<DetalleFactura>()
             .HasIndex(d => new { d.IdFactura, d.IdItem })
             .IsUnique();
 
-        // Composición Factura -> DetalleFactura (Borrado en cascada configurado a restricción por seguridad contable)
-        modelBuilder.Entity<Factura>()
-            .HasMany(f => f.Detalles)
-            .WithOne(d => d.Factura)
+        // Factura -> Detalles: protege los registros contables
+        // frente al borrado en cascada.
+        modelBuilder.Entity<DetalleFactura>()
+            .HasOne(d => d.Factura)
+            .WithMany(f => f.Detalles)
             .HasForeignKey(d => d.IdFactura)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // Nombres de tablas en español (siguiendo el estándar)[cite: 13]
-        modelBuilder.Entity<Factura>().ToTable("FACTURA");
-        modelBuilder.Entity<DetalleFactura>().ToTable("DETALLEFACTURA");
-        // --- FIN CONFIGURACIÓN INTEGRANTE 3 ---
-        */
+        // ItemFacturable -> Detalles.
+        modelBuilder.Entity<DetalleFactura>()
+            .HasOne(d => d.Item)
+            .WithMany(i => i.DetallesFactura)
+            .HasForeignKey(d => d.IdItem)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -1,0 +1,46 @@
+@model IEnumerable<CG_Electronica.Web.Models.Auditoria>
+
+@{
+    ViewData["Title"] = "Registro de Auditoría";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Auditoría del Sistema</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+        <li class="breadcrumb-item active">Auditoría</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-shield-alt me-1"></i> Últimos 100 Eventos Registrados en el Sistema
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Fecha y Hora</th>
+                            <th>Acción</th>
+                            <th>Registro Afectado</th>
+                            <th>Usuario Responsable</th>
+                            <th>Observación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.FechaHora.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                <td><span class="badge bg-secondary">@item.Accion</span></td>
+                                <td><code>@item.RegistroAfectado</code></td>
+                                <td>@item.Usuario?.NombreUsuario</td>
+                                <td>@item.Observacion</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
