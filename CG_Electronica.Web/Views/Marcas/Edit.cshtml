@@ -1,0 +1,29 @@
+﻿@model CG_Electronica.Web.Models.ViewModels.MarcaViewModel
+@{
+    ViewData["Title"] = "Editar Marca";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm mt-4 border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0"><i class="bi bi-pencil-square"></i> Editar Marca</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <partial name="_Formulario" model="Model" />
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-warning"><i class="bi bi-save"></i> Guardar Cambios</button>
+                        <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+}

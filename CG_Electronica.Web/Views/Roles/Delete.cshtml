@@ -1,0 +1,36 @@
+﻿@model CG_Electronica.Web.Models.Rol
+
+@{
+    ViewData["Title"] = "Eliminar Rol";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm mt-4 border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Confirmar Eliminación de Rol</h4>
+            </div>
+            <div class="card-body">
+                <p class="fs-5 text-danger">¿Está seguro de que desea eliminar este rol de forma permanente?</p>
+
+                <ul class="list-group list-group-flush mb-4">
+                    <li class="list-group-item"><strong>Nombre del Rol:</strong> @Model.NombreRol</li>
+                    <li class="list-group-item"><strong>Descripción:</strong> @(Model.Descripcion ?? "Sin descripción")</li>
+                    <li class="list-group-item"><strong>Permisos Asociados:</strong> @(Model.RolPermisos?.Count ?? 0) permisos</li>
+                </ul>
+
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" asp-for="IdRol" />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Sí, Eliminar Rol
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

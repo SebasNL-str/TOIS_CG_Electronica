@@ -29,6 +29,10 @@ namespace CG_Electronica.Web.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCategoria"));
 
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("NombreCategoria")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -54,6 +58,10 @@ namespace CG_Electronica.Web.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NombreCliente")
                         .IsRequired()
@@ -82,8 +90,7 @@ namespace CG_Electronica.Web.Data.Migrations
 
                     b.Property<string>("Estado")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NombreMarca")
                         .IsRequired()
@@ -135,6 +142,10 @@ namespace CG_Electronica.Web.Data.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("NombreRol")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -175,6 +186,10 @@ namespace CG_Electronica.Web.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("IdRol")
                         .HasColumnType("int");

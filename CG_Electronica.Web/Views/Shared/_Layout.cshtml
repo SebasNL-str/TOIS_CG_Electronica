@@ -26,6 +26,46 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            @if (User.TienePermiso("Clientes.Ver"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Clientes" asp-action="Index">Clientes</a>
+                                </li>
+                            }
+                            @if (User.TienePermiso("Catalogos.Ver"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Marcas" asp-action="Index">Marcas</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Categorias" asp-action="Index">Categorías</a>
+                                </li>
+                            }
+                            @if (User.TienePermiso("Usuarios.Ver"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Usuarios" asp-action="Index">Usuarios</a>
+                                </li>
+                            }
+                            @if (User.TienePermiso("Roles.Ver"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Roles" asp-action="Index">Roles</a>
+                                </li>
+                            }
+                            <li class="nav-item ms-auto d-flex align-items-center gap-3 pe-3">
+                                <span class="navbar-text text-dark small mb-0">
+                                    <i class="bi bi-person-circle"></i> @User.NombreCompleto() (@User.Rol())
+                                </span>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-box-arrow-right"></i> Salir
+                                    </button>
+                                </form>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

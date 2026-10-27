@@ -18,4 +18,5 @@ public class Cliente
     [Required(ErrorMessage = "La cédula es obligatoria.")]
     [StringLength(50)]
     public string Cedula { get; set; } = string.Empty;
+    public string Estado { get; set; } = "Activo";
 }

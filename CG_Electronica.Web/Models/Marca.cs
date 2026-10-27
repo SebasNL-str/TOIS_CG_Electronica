@@ -11,7 +11,7 @@ public class Marca
     [StringLength(150)]
     public string NombreMarca { get; set; } = string.Empty;
 
-    [Required]
-    [StringLength(30)]
+
+    [Required(ErrorMessage = "El estado es obligatorio.")]
     public string Estado { get; set; } = "Activo";
 }

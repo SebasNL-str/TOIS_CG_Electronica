@@ -1,0 +1,51 @@
+﻿@model CG_Electronica.Web.Models.ViewModels.RolViewModel
+
+<input asp-for="IdRol" type="hidden" />
+
+<div class="mb-3">
+    <label asp-for="NombreRol" class="form-label fw-bold"></label>
+    <input asp-for="NombreRol" class="form-control" placeholder="Ej. Cajero, Supervisor, Bodeguero" autocomplete="off" />
+    <span asp-validation-for="NombreRol" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Descripcion" class="form-label fw-bold"></label>
+    <textarea asp-for="Descripcion" class="form-control" placeholder="Ej. Acceso limitado a ventas y facturación" rows="2"></textarea>
+    <span asp-validation-for="Descripcion" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Estado" class="form-label fw-bold"></label>
+    <select asp-for="Estado" class="form-select">
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+    </select>
+    <span asp-validation-for="Estado" class="text-danger"></span>
+</div>
+
+<h5 class="mt-4 text-primary"><i class="bi bi-shield-check"></i> Asignación de Permisos</h5>
+<hr class="mt-1 mb-3" />
+
+
+<div class="row">
+
+    @for (int i = 0; i < Model.Permisos.Count; i++)
+    {
+        <div class="col-md-6 mb-3">
+            <div class="form-check form-switch">
+                <input type="hidden" asp-for="Permisos[i].IdPermiso" />
+                <input type="hidden" asp-for="Permisos[i].NombrePermiso" />
+                <input type="hidden" asp-for="Permisos[i].Descripcion" />
+
+                <input class="form-check-input" type="checkbox" asp-for="Permisos[i].Seleccionado" />
+                <label class="form-check-label fw-bold" asp-for="Permisos[i].Seleccionado">
+                    @Model.Permisos[i].NombrePermiso
+                </label>
+                @if (!string.IsNullOrEmpty(Model.Permisos[i].Descripcion))
+                {
+                    <small class="d-block text-muted">@Model.Permisos[i].Descripcion</small>
+                }
+            </div>
+        </div>
+    }
+</div>

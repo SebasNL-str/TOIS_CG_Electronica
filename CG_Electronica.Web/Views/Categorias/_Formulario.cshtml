@@ -1,0 +1,19 @@
+﻿@model CG_Electronica.Web.Models.ViewModels.CategoriaViewModel
+
+<input asp-for="IdCategoria" type="hidden" />
+
+<div class="mb-3">
+    <label asp-for="NombreCategoria" class="form-label fw-bold"></label>
+    <input asp-for="NombreCategoria" class="form-control" placeholder="Ej. Smartphones, Cargadores, Fundas" autocomplete="off" />
+    <span asp-validation-for="NombreCategoria" class="text-danger"></span>
+</div>
+
+<!-- NUEVO: Campo Estado -->
+<div class="mb-3">
+    <label asp-for="Estado" class="form-label fw-bold"></label>
+    <select asp-for="Estado" class="form-select">
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+    </select>
+    <span asp-validation-for="Estado" class="text-danger"></span>
+</div>

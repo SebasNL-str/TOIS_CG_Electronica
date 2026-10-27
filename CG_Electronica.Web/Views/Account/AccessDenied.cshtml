@@ -1,0 +1,31 @@
+﻿@{
+    ViewData["Title"] = "Acceso Denegado";
+}
+
+<div class="row justify-content-center align-items-center" style="min-height: 75vh;">
+    <div class="col-md-6 col-lg-5 text-center">
+        <div class="card shadow-lg border-0 rounded-4 p-4 p-sm-5">
+            <div class="card-body">
+
+                <!-- Ícono grande de advertencia/candado -->
+                <div class="mb-4">
+                    <i class="bi bi-shield-lock-fill text-danger display-1"></i>
+                </div>
+
+                <h2 class="text-danger fw-bold mb-3">Acceso Denegado</h2>
+
+                <p class="text-muted mb-4">
+                    Lo sentimos, tu usuario no cuenta con los permisos necesarios para acceder a esta sección o recurso del sistema. Si consideras que esto es un error, comunícate con el administrador.
+                </p>
+
+                <!-- Botón de retorno al inicio -->
+                <div class="d-grid">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                        <i class="bi bi-house-door-fill"></i> Volver al Inicio
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

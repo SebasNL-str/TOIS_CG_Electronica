@@ -1,0 +1,31 @@
+﻿@model CG_Electronica.Web.Models.ViewModels.ClienteViewModel
+
+<input asp-for="IdCliente" type="hidden" />
+
+<div class="mb-3">
+    <label asp-for="Cedula" class="form-label fw-bold"></label>
+    <input asp-for="Cedula" class="form-control" placeholder="Ej. 001-1234567-8" autocomplete="off" />
+    <span asp-validation-for="Cedula" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="NombreCliente" class="form-label fw-bold"></label>
+    <input asp-for="NombreCliente" class="form-control" placeholder="Ej. Juan Pérez" autocomplete="off" />
+    <span asp-validation-for="NombreCliente" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Telefono" class="form-label fw-bold"></label>
+    <input asp-for="Telefono" class="form-control" placeholder="Ej. 809-555-1234" autocomplete="off" />
+    <span asp-validation-for="Telefono" class="text-danger"></span>
+</div>
+
+<!-- NUEVO: Campo Estado -->
+<div class="mb-3">
+    <label asp-for="Estado" class="form-label fw-bold"></label>
+    <select asp-for="Estado" class="form-select">
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+    </select>
+    <span asp-validation-for="Estado" class="text-danger"></span>
+</div>

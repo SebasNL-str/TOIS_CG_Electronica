@@ -1,4 +1,8 @@
+using CG_Electronica.Web.Authorization;
 using CG_Electronica.Web.Data;
+//using CG_Electronica.Web.Services; // NUEVO - Namespace de tus servicios
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,19 +15,50 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
+// --- INICIO REGISTRO DE SERVICIOS (LÓGICA DE NEGOCIO) ---
+
+// TODO: Registro de los servicios del Integrante 2 (Fase 2 - Inventario y Auditoría)
+// Cuando el Integrante 2 integre su rama, debe descomentar/agregar sus servicios aquí:
+// builder.Services.AddScoped<IServicioInventario, ServicioInventario>();
+// builder.Services.AddScoped<IServicioAuditoria, ServicioAuditoria>();
+
+// NUEVO - Registro de tu Servicio de Ventas (Fase 3 - Facturación)[cite: 7]
+//builder.Services.AddScoped<IServicioVentas, ServicioVentas>();
+
+// --- FIN REGISTRO DE SERVICIOS ---
+
+
+// NUEVO - Autenticación con cookies[cite: 11]
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+    });
+
+// NUEVO - Autorización con proveedor de políticas dinámico[cite: 11]
+builder.Services.AddAuthorization();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermisoPolicyProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, PermisoHandler>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.[cite: 11]
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
@@ -33,5 +68,10 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    DbInitializer.Seed(context);
+}
 
 app.Run();

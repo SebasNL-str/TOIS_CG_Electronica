@@ -1,0 +1,36 @@
+﻿@model CG_Electronica.Web.Models.Usuario
+
+@{
+    ViewData["Title"] = "Eliminar Usuario";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm mt-4 border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Confirmar Eliminación</h4>
+            </div>
+            <div class="card-body">
+                <p class="fs-5 text-danger">¿Está seguro de que desea eliminar este usuario de forma permanente?</p>
+
+                <ul class="list-group list-group-flush mb-4">
+                    <li class="list-group-item"><strong>Nombre de Usuario:</strong> @Model.NombreUsuario</li>
+                    <li class="list-group-item"><strong>Nombre Completo:</strong> @Model.Nombre</li>
+                    <li class="list-group-item"><strong>Rol:</strong> @Model.Rol?.NombreRol</li>
+                </ul>
+
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" asp-for="IdUsuario" />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Sí, Eliminar
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

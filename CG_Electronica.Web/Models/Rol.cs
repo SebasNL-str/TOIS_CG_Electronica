@@ -16,4 +16,5 @@ public class Rol
 
     public ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();
     public ICollection<RolPermiso> RolPermisos { get; set; } = new List<RolPermiso>();
+    public string Estado { get; set; } = "Activo";
 }
