@@ -30,7 +30,12 @@ public class CategoriasController : Controller
 
         if (!ModelState.IsValid) return View(model);
 
-        _context.Categorias.Add(new Categoria { NombreCategoria = model.NombreCategoria });
+        _context.Categorias.Add(new Categoria
+        {
+            NombreCategoria = model.NombreCategoria,
+            Estado = "Activo" // <--- Asignamos el estado inicial requerido por la BD
+        });
+
         await _context.SaveChangesAsync();
         TempData["Ok"] = "Categoría creada correctamente.";
         return RedirectToAction(nameof(Index));
@@ -116,5 +121,19 @@ public class CategoriasController : Controller
             TempData["Ok"] = "Categoría inactivada correctamente.";
         }
         return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> VerificarNombreCategoria(string nombreCategoria, int idCategoria = 0)
+    {
+        bool existe = await _context.Categorias
+        .AnyAsync(c => c.NombreCategoria.ToLower() == nombreCategoria.ToLower() && c.IdCategoria != idCategoria);
+
+        if (existe)
+        {
+            return Json($"Ya existe una categoría con el nombre '{nombreCategoria}'.");
+        }
+
+        return Json(true);
     }
 }

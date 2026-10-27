@@ -100,28 +100,43 @@ public class AppDbContext : DbContext
             .HasIndex(p => p.NombrePermiso)
             .IsUnique();
 
-        // =====================================================
-        // 2. CLIENTES Y CATÁLOGOS
-        // =====================================================
+            // =====================================================
+            // 2. CLIENTES Y CATÁLOGOS
+            // =====================================================
 
-        modelBuilder.Entity<Cliente>()
+            modelBuilder.Entity<Cliente>()
             .ToTable("CLIENTE");
 
-        modelBuilder.Entity<Marca>()
+            modelBuilder.Entity<Marca>()
             .ToTable("MARCA");
 
-        modelBuilder.Entity<Categoria>()
-            .ToTable("CATEGORIA");
+            // Añade el mapeo explícito para CATEGORIA
+            modelBuilder.Entity<Categoria>()
+            .ToTable("CATEGORIA")
+            .HasKey(c => c.IdCategoria);
 
-        modelBuilder.Entity<Cliente>()
+            modelBuilder.Entity<Categoria>()
+            .Property(c => c.IdCategoria)
+            .HasColumnName("idCategoria");
+
+            modelBuilder.Entity<Categoria>()
+            .Property(c => c.NombreCategoria)
+            .HasColumnName("nombreCategoria");
+
+            modelBuilder.Entity<Categoria>()
+            .Property(c => c.Estado)
+            .HasColumnName("estado")
+            .HasDefaultValue("Activo"); // Asegura un valor por defecto si no viene informado
+
+            modelBuilder.Entity<Cliente>()
             .HasIndex(c => c.Cedula)
             .IsUnique();
 
-        modelBuilder.Entity<Marca>()
+            modelBuilder.Entity<Marca>()
             .HasIndex(m => m.NombreMarca)
             .IsUnique();
 
-        modelBuilder.Entity<Categoria>()
+            modelBuilder.Entity<Categoria>()
             .HasIndex(c => c.NombreCategoria)
             .IsUnique();
 
