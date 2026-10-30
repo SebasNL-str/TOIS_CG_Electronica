@@ -19,20 +19,21 @@ public class ServicioInventario : IServicioInventario
     {
         if (cantidad <= 0) throw new ArgumentException("La cantidad debe ser mayor a cero.", nameof(cantidad));
 
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        // Reutiliza la transacción existente si la hay; de lo contrario, crea una nueva
+        var existingTransaction = _context.Database.CurrentTransaction;
+        var transaction = existingTransaction == null ? await _context.Database.BeginTransactionAsync() : null;
         try
         {
             var producto = await _context.Productos.FindAsync(idProducto);
             if (producto == null) throw new KeyNotFoundException("El producto especificado no existe.");
 
-            // Actualizar stock y último costo de compra
             producto.Existencias += cantidad;
             producto.PrecioCompra = precioCompraUnitario;
 
             var movimiento = new MovimientoInventario
             {
                 TipoMovimiento = "Entrada",
-                Motivo = motivo, // Ej: 'Entrada por compra', 'Entrada por devolución de cliente'
+                Motivo = motivo,
                 Cantidad = cantidad,
                 PrecioCompraUnitario = precioCompraUnitario,
                 IdProducto = idProducto,
@@ -51,12 +52,16 @@ public class ServicioInventario : IServicioInventario
                 observacion ?? $"Entrada por {motivo}"
             );
 
-            await transaction.CommitAsync();
+            if (transaction != null) await transaction.CommitAsync();
         }
         catch
         {
-            await transaction.RollbackAsync();
+            if (transaction != null) await transaction.RollbackAsync();
             throw;
+        }
+        finally
+        {
+            transaction?.Dispose();
         }
     }
 
@@ -64,16 +69,18 @@ public class ServicioInventario : IServicioInventario
     {
         if (cantidad <= 0) throw new ArgumentException("La cantidad debe ser mayor a cero.", nameof(cantidad));
 
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        // Reutiliza la transacción existente si la hay; de lo contrario, crea una nueva
+        var existingTransaction = _context.Database.CurrentTransaction;
+        var transaction = existingTransaction == null ? await _context.Database.BeginTransactionAsync() : null;
         try
         {
             var producto = await _context.Productos.FindAsync(idProducto);
             if (producto == null) throw new KeyNotFoundException("El producto especificado no existe.");
 
-            // Validación estricta de stock disponible (Bloquea venta si stock < cantidad solicitada)
+            // Validación estricta de stock disponible
             if (producto.Existencias < cantidad)
             {
-                throw new InvalidOperationException($"Stock insuficiente. Stock actual: {producto.Existencias}, Cantidad solicitada: {cantidad}.");
+                throw new InvalidOperationException($"Stock insuficiente para '{producto.Descripcion}'. Stock actual: {producto.Existencias}, Cantidad solicitada: {cantidad}.");
             }
 
             producto.Existencias -= cantidad;
@@ -81,7 +88,7 @@ public class ServicioInventario : IServicioInventario
             var movimiento = new MovimientoInventario
             {
                 TipoMovimiento = "Salida",
-                Motivo = motivo, // Ej: 'Salida por venta', 'Salida por producto dañado'
+                Motivo = motivo,
                 Cantidad = cantidad,
                 PrecioCompraUnitario = producto.PrecioCompra,
                 IdProducto = idProducto,
@@ -100,12 +107,16 @@ public class ServicioInventario : IServicioInventario
                 observacion ?? $"Salida por {motivo}"
             );
 
-            await transaction.CommitAsync();
+            if (transaction != null) await transaction.CommitAsync();
         }
         catch
         {
-            await transaction.RollbackAsync();
+            if (transaction != null) await transaction.RollbackAsync();
             throw;
+        }
+        finally
+        {
+            transaction?.Dispose();
         }
     }
 
@@ -113,7 +124,9 @@ public class ServicioInventario : IServicioInventario
     {
         if (nuevaExistencia < 0) throw new ArgumentException("Las existencias no pueden ser negativas.", nameof(nuevaExistencia));
 
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        // Reutiliza la transacción existente si la hay; de lo contrario, crea una nueva
+        var existingTransaction = _context.Database.CurrentTransaction;
+        var transaction = existingTransaction == null ? await _context.Database.BeginTransactionAsync() : null;
         try
         {
             var producto = await _context.Productos.FindAsync(idProducto);
@@ -149,19 +162,23 @@ public class ServicioInventario : IServicioInventario
                 observacion
             );
 
-            await transaction.CommitAsync();
+            if (transaction != null) await transaction.CommitAsync();
         }
         catch
         {
-            await transaction.RollbackAsync();
+            if (transaction != null) await transaction.RollbackAsync();
             throw;
+        }
+        finally
+        {
+            transaction?.Dispose();
         }
     }
 
     public async Task<List<Producto>> ObtenerProductosConStockMinimoAsync()
     {
         return await _context.Productos
-            .Where(p => p.Existencias <= p.ExistenciasMinimas && p.Estado == "Activo")
-            .ToListAsync();
+        .Where(p => p.Existencias <= p.ExistenciasMinimas && p.Estado == "Activo")
+        .ToListAsync();
     }
 }

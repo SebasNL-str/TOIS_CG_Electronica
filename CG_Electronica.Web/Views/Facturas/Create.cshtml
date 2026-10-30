@@ -94,11 +94,81 @@
 </div>
 
 @section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
         let itemsFactura = [];
 
-        // Simulación básica para manejar los ítems en el front antes de enviar al backend
-        // (Nota: En un entorno de producción avanzado se puede consultar el precio unitario vía AJAX, 
-        // aquí podemos estructurarlo con los inputs del DOM o catálogos embebidos).
+        // Catálogo de productos disponibles (se pueden obtener sus precios o manejarlos en memoria)
+        // Aquí escuchamos el clic en el botón de agregar
+        document.getElementById('btnAgregarItem').addEventListener('click', function () {
+            const selectProducto = document.getElementById('selectProducto');
+            const inputCantidad = document.getElementById('inputCantidad');
+
+            const idItem = selectProducto.value;
+            const descripcionItem = selectProducto.options[selectProducto.selectedIndex].text;
+            const cantidad = parseInt(inputCantidad.value);
+
+            if (!idItem) {
+                alert('Por favor seleccione un producto.');
+                return;
+            }
+
+            if (isNaN(cantidad) || cantidad <= 0) {
+                alert('Ingrese una cantidad válida mayor a 0.');
+                return;
+            }
+
+            // Nota: Para obtener el precio unitario de forma dinámica se puede consultar al backend o 
+            // extraerlo si se renderiza en data attributes. Como alternativa segura y directa para este form:
+            // Vamos a verificar si ya existe en la lista para sumarle la cantidad o agregarlo como nuevo.
+            
+            // Para mantener la simplicidad y robustez, haremos una petición rápida o simularemos el precio 
+            // Buscando el elemento o enviando los campos indexados que ASP.NET Core mapea automáticamente.
+            
+            // Verificamos si ya fue agregado
+            const indexExistente = itemsFactura.findIndex(i => i.idItem === idItem);
+            if (indexExistente >= 0) {
+                itemsFactura[indexExistente].cantidad += cantidad;
+            } else {
+                itemsFactura.push({
+                    idItem: idItem,
+                    descripcion: descripcionItem,
+                    cantidad: cantidad
+                });
+            }
+
+            actualizarTablaDetalles();
+        });
+
+        function actualizarTablaDetalles() {
+            const tbody = document.querySelector('#tablaDetalles tbody');
+            tbody.innerHTML = '';
+
+            itemsFactura.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        ${item.descripcion}
+                        <input type="hidden" name="items[${index}].IdItem" value="${item.idItem}" />
+                    </td>
+                    <td class="text-center">
+                        ${item.cantidad}
+                        <input type="hidden" name="items[${index}].Cantidad" value="${item.cantidad}" />
+                    </td>
+                    <td class="text-end">N/D</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="eliminarItem(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function eliminarItem(index) {
+            itemsFactura.splice(index, 1);
+            actualizarTablaDetalles();
+        }
     </script>
 }

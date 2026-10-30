@@ -1,12 +1,13 @@
 using CG_Electronica.Web.Data;
 using CG_Electronica.Web.Models;
+using CG_Electronica.Web.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CG_Electronica.Web.Controllers;
 
-[Authorize]
+[Authorize(Policy = "Permiso:Catalogos.Ver")]
 public class ServiciosController : Controller
 {
     private readonly AppDbContext _context;
@@ -18,61 +19,44 @@ public class ServiciosController : Controller
 
     public async Task<IActionResult> Index()
     {
-        return View(await _context.Servicios.ToListAsync());
+        var servicios = await _context.Servicios
+        .OrderBy(s => s.NombreServicio)
+        .ToListAsync();
+        return View(servicios);
     }
 
+    [Authorize(Policy = "Permiso:Catalogos.Editar")]
     public IActionResult Create()
     {
-        return View();
+        return View(new ServicioCreateViewModel());
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Servicio servicio)
+    [Authorize(Policy = "Permiso:Catalogos.Editar")]
+    public async Task<IActionResult> Create(ServicioCreateViewModel model)
     {
-        ModelState.Remove(nameof(servicio.DetallesFactura));
-
-        if (ModelState.IsValid)
+        if (await _context.Servicios.AnyAsync(s => s.NombreServicio.ToLower() == model.NombreServicio.ToLower()))
         {
-            _context.ItemsFacturables.Add(servicio);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            ModelState.AddModelError(nameof(model.NombreServicio), "Ya existe un servicio registrado con este nombre.");
         }
-        return View(servicio);
-    }
 
-    public async Task<IActionResult> Edit(int? id)
-    {
-        if (id == null) return NotFound();
-
-        var servicio = await _context.Servicios.FindAsync(id);
-        if (servicio == null) return NotFound();
-
-        return View(servicio);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, Servicio servicio)
-    {
-        if (id != servicio.IdItem) return NotFound();
-
-        ModelState.Remove(nameof(servicio.DetallesFactura));
-
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            try
-            {
-                _context.Update(servicio);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!_context.Servicios.Any(s => s.IdItem == id)) return NotFound();
-                else throw;
-            }
-            return RedirectToAction(nameof(Index));
+            return View(model);
         }
-        return View(servicio);
+
+        var servicio = new Servicio
+        {
+            NombreServicio = model.NombreServicio,
+            PrecioVenta = model.PrecioVenta,
+            Estado = model.Estado
+        };
+
+        _context.Servicios.Add(servicio);
+        await _context.SaveChangesAsync();
+
+        TempData["Ok"] = "Servicio creado correctamente.";
+        return RedirectToAction(nameof(Index));
     }
 }
