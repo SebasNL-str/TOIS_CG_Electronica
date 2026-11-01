@@ -1,0 +1,109 @@
+@model CG_Electronica.Web.Models.Producto
+
+@{
+    ViewData["Title"] = "Editar Producto";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Editar Producto</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Productos</a></li>
+        <li class="breadcrumb-item active">Editar</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-edit me-1"></i>
+            Actualizar Datos del Producto
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                
+                <!-- Clave primaria real -->
+                <input type="hidden" asp-for="IdItem" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Descripcion" class="form-label font-weight-bold">Nombre / Descripción del Producto</label>
+                        <input asp-for="Descripcion" class="form-control" />
+                        <span asp-validation-for="Descripcion" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Modelo" class="form-label font-weight-bold">Modelo</label>
+                        <input asp-for="Modelo" class="form-control" />
+                        <span asp-validation-for="Modelo" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CodigoFabricante" class="form-label font-weight-bold">Código de Fabricante</label>
+                        <input asp-for="CodigoFabricante" class="form-control" />
+                        <span asp-validation-for="CodigoFabricante" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="PrecioCompra" class="form-label font-weight-bold">Precio Compra ($)</label>
+                        <input asp-for="PrecioCompra" class="form-control" type="number" step="0.01" min="0.00" />
+                        <span asp-validation-for="PrecioCompra" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="PrecioVenta" class="form-label font-weight-bold">Precio Venta ($)</label>
+                        <input asp-for="PrecioVenta" class="form-control" type="number" step="0.01" min="0.01" />
+                        <span asp-validation-for="PrecioVenta" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="ExistenciasMinimas" class="form-label font-weight-bold">Existencias Mínimas</label>
+                        <input asp-for="ExistenciasMinimas" class="form-control" type="number" min="0" />
+                        <span asp-validation-for="ExistenciasMinimas" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="IdMarca" class="form-label font-weight-bold">Marca</label>
+                        <select asp-for="IdMarca" class="form-select" asp-items="ViewBag.IdMarca">
+                            <option value="">-- Seleccione una Marca --</option>
+                        </select>
+                        <span asp-validation-for="IdMarca" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="IdCategoria" class="form-label font-weight-bold">Categoría</label>
+                        <select asp-for="IdCategoria" class="form-select" asp-items="ViewBag.IdCategoria">
+                            <option value="">-- Seleccione una Categoría --</option>
+                        </select>
+                        <span asp-validation-for="IdCategoria" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Estado" class="form-label font-weight-bold">Estado</label>
+                    <select asp-for="Estado" class="form-select">
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                    </select>
+                    <span asp-validation-for="Estado" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -30,7 +30,7 @@
                             </li>
 
                             <!-- DROPDOWN: GESTIÓN COMERCIAL -->
-                            @if (User.TienePermiso("Catalogos.Ver") || User.TienePermiso("Clientes.Ver"))
+                            @if (User.TienePermiso("Catalogos.Ver") || User.TienePermiso("Clientes.Ver") || User.TienePermiso("Ventas.Ver") || User.TienePermiso("Facturas.Ver"))
                             {
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-light" href="#" id="comercialDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -45,6 +45,10 @@
                                         {
                                             <li><a class="dropdown-item" asp-controller="Productos" asp-action="Index"><i class="fas fa-box me-2"></i> Productos</a></li>
                                             <li><a class="dropdown-item" asp-controller="Servicios" asp-action="Index"><i class="fas fa-concierge-bell me-2"></i> Servicios</a></li>
+                                        }
+                                        @if (User.TienePermiso("Ventas.Ver") || User.TienePermiso("Facturas.Ver"))
+                                        {
+                                            <li><a class="dropdown-item" asp-controller="Facturas" asp-action="Index"><i class="fas fa-file-invoice-dollar me-2"></i> Facturación</a></li>
                                         }
                                     </ul>
                                 </li>
@@ -64,22 +68,15 @@
                                 </li>
                             }
 
-                            <!-- DROPDOWN: OPERACIONES / INVENTARIO Y FACTURACIÓN -->
-                            @if (User.TienePermiso("Inventario.Ver") || User.TienePermiso("Ventas.Ver") || User.TienePermiso("Facturas.Ver"))
+                            <!-- DROPDOWN: OPERACIONES / INVENTARIO -->
+                            @if (User.TienePermiso("Inventario.Ver"))
                             {
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-light" href="#" id="operacionesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fas fa-cash-register me-1"></i> Operaciones
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="operacionesDropdown">
-                                        @if (User.TienePermiso("Ventas.Ver") || User.TienePermiso("Facturas.Ver"))
-                                        {
-                                            <li><a class="dropdown-item" asp-controller="Facturas" asp-action="Index"><i class="fas fa-file-invoice-dollar me-2"></i> Facturación</a></li>
-                                        }
-                                        @if (User.TienePermiso("Inventario.Ver"))
-                                        {
-                                            <li><a class="dropdown-item" asp-controller="Inventario" asp-action="Index"><i class="fas fa-warehouse me-2"></i> Inventario &amp; Kardex</a></li>
-                                        }
+                                        <li><a class="dropdown-item" asp-controller="Inventario" asp-action="Index"><i class="fas fa-warehouse me-2"></i> Inventario &amp; Kardex</a></li>
                                     </ul>
                                 </li>
                             }

@@ -37,16 +37,16 @@
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label asp-for="IdMarca" class="form-label fw-bold">Marca</label>
-                        <select asp-for="IdMarca" class="form-select" asp-items="ViewBag.Marcas">
-                            <option value="">-- Seleccione una Marca --</option>
-                        </select>
+<select asp-for="IdMarca" class="form-select" asp-items="ViewBag.IdMarca">
+    <option value="">-- Seleccione una Marca --</option>
+</select>
                         <span asp-validation-for="IdMarca" class="text-danger"></span>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label asp-for="IdCategoria" class="form-label fw-bold">Categoría</label>
-                        <select asp-for="IdCategoria" class="form-select" asp-items="ViewBag.Categorias">
-                            <option value="">-- Seleccione una Categoría --</option>
-                        </select>
+<select asp-for="IdCategoria" class="form-select" asp-items="ViewBag.IdCategoria">
+    <option value="">-- Seleccione una Categoría --</option>
+</select>
                         <span asp-validation-for="IdCategoria" class="text-danger"></span>
                     </div>
                     <div class="col-md-4 mb-3">

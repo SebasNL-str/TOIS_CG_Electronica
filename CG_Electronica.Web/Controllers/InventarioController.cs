@@ -26,9 +26,9 @@ public class InventarioController : Controller
         ViewBag.Productos = new SelectList(_context.Productos, "IdItem", "Descripcion", idProducto);
 
         var query = _context.MovimientosInventario
-            .Include(m => m.Producto)
-            .Include(m => m.Usuario)
-            .AsQueryable();
+        .Include(m => m.Producto)
+        .Include(m => m.Usuario)
+        .AsQueryable();
 
         if (idProducto.HasValue)
         {
@@ -52,6 +52,51 @@ public class InventarioController : Controller
     {
         try
         {
+            // Validación robusta y consistente con los valores reales enviados por la vista
+            if (tipoMovimiento == "Entrada")
+            {
+                if (motivo != "Entrada por compra" &&
+                    motivo != "Entrada por devolución de cliente" &&
+                    motivo != "Ajuste de inventario")
+                {
+                    ModelState.AddModelError(
+                        "motivo",
+                        "El motivo seleccionado no es válido para una entrada de inventario."
+                    );
+                }
+            }
+            else if (tipoMovimiento == "Salida")
+            {
+                if (motivo != "Salida por producto dañado" &&
+                    motivo != "Ajuste de inventario")
+                {
+                    ModelState.AddModelError(
+                        "motivo",
+                        "El motivo seleccionado no es válido para una salida de inventario."
+                    );
+                }
+            }
+            else
+            {
+                ModelState.AddModelError(
+                    "tipoMovimiento",
+                    "El tipo de movimiento seleccionado no es válido."
+                );
+            }
+
+            // Si existen errores de validación, regresar a la vista sin registrar.
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Productos = new SelectList(
+                    _context.Productos,
+                    "IdItem",
+                    "Descripcion",
+                    idProducto
+                );
+
+                return View();
+            }
+
             int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
 
             if (tipoMovimiento == "Entrada")

@@ -1,3 +1,4 @@
+
 using CG_Electronica.Web.Data;
 using CG_Electronica.Web.Models;
 using CG_Electronica.Web.Services;
@@ -25,9 +26,9 @@ public class ProductosController : Controller
     public async Task<IActionResult> Index()
     {
         var productos = await _context.Productos
-            .Include(p => p.Marca)
-            .Include(p => p.Categoria)
-            .ToListAsync();
+        .Include(p => p.Marca)
+        .Include(p => p.Categoria)
+        .ToListAsync();
         return View(productos);
     }
 
@@ -58,9 +59,9 @@ public class ProductosController : Controller
             // 2. Si hay stock inicial, registrar la entrada mediante el servicio de inventario
             if (stockInicial > 0)
             {
-                int idUsuario = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value != null 
-                    ? int.Parse(HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value) 
-                    : 1; // Ajustar según claims de sesión
+                int idUsuario = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value != null
+                ? int.Parse(HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value)
+                : 1; // Ajustar según claims de sesión
 
                 await _servicioInventario.RegistrarEntradaAsync(producto.IdItem, stockInicial, precioCompraInicial, "Entrada por compra", idUsuario, "Inventario inicial de creación");
             }
@@ -72,19 +73,29 @@ public class ProductosController : Controller
         return View(producto);
     }
 
+    // GET: Productos/Edit/5
+    // GET: Productos/Edit/5
+    [HttpGet]
+    [Authorize(Policy = "Permiso:ProductosEditar")]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null) return NotFound();
 
-        var producto = await _context.Productos.FindAsync(id);
+        var producto = await _context.Productos
+        .FirstOrDefaultAsync(p => p.IdItem == id);
+
         if (producto == null) return NotFound();
 
-        CargarListasSelect();
+        CargarListasSelect(producto.IdMarca, producto.IdCategoria);
+
         return View(producto);
     }
 
+    // POST: Productos/Edit/5
+    // POST: Productos/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Policy = "Permiso:ProductosEditar")]
     public async Task<IActionResult> Edit(int id, Producto producto)
     {
         if (id != producto.IdItem) return NotFound();
@@ -98,10 +109,13 @@ public class ProductosController : Controller
         {
             try
             {
-                var productoDb = await _context.Productos.AsNoTracking().FirstOrDefaultAsync(p => p.IdItem == id);
+                var productoDb = await _context.Productos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.IdItem == id);
+
                 if (productoDb == null) return NotFound();
 
-                // Preservar existencias y precio de compra actuales (se manejan por inventario/compras)
+                // Preservar existencias y precio de compra actuales.
                 producto.Existencias = productoDb.Existencias;
                 producto.PrecioCompra = productoDb.PrecioCompra;
 
@@ -110,13 +124,17 @@ public class ProductosController : Controller
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ProductoExists(producto.IdItem)) return NotFound();
-                else throw;
+                if (!ProductoExists(producto.IdItem))
+                    return NotFound();
+                else
+                    throw;
             }
+
             return RedirectToAction(nameof(Index));
         }
 
-        CargarListasSelect();
+        CargarListasSelect(producto.IdMarca, producto.IdCategoria);
+
         return View(producto);
     }
 
@@ -125,9 +143,24 @@ public class ProductosController : Controller
         return _context.Productos.Any(e => e.IdItem == id);
     }
 
-    private void CargarListasSelect()
+    private void CargarListasSelect(int? idMarcaSeleccionada = null, int? idCategoriaSeleccionada = null)
     {
-        ViewBag.Marcas = new SelectList(_context.Marcas.Where(m => m.Estado == "Activo"), "IdMarca", "NombreMarca");
-        ViewBag.Categorias = new SelectList(_context.Categorias.Where(c => c.Estado == "Activo"), "IdCategoria", "NombreCategoria");
+        ViewBag.IdMarca = new SelectList(
+            _context.Marcas
+            .Where(m => m.Estado == "Activo")
+            .ToList(),
+                                         "IdMarca",
+                                         "NombreMarca",
+                                         idMarcaSeleccionada
+        );
+
+        ViewBag.IdCategoria = new SelectList(
+            _context.Categorias
+            .Where(c => c.Estado == "Activo")
+            .ToList(),
+                                             "IdCategoria",
+                                             "NombreCategoria",
+                                             idCategoriaSeleccionada
+        );
     }
 }

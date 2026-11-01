@@ -1,3 +1,4 @@
+
 using CG_Electronica.Web.Data;
 using CG_Electronica.Web.Models;
 using CG_Electronica.Web.Models.ViewModels;
@@ -58,5 +59,58 @@ public class ServiciosController : Controller
 
         TempData["Ok"] = "Servicio creado correctamente.";
         return RedirectToAction(nameof(Index));
+    }
+
+    // GET: Servicios/Edit/5
+    [HttpGet]
+    [Authorize(Policy = "Permiso:ServiciosEditar")]
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id == null) return NotFound();
+
+        var servicio = await _context.Servicios.FindAsync(id);
+        if (servicio == null) return NotFound();
+
+        return View(servicio);
+    }
+
+    // POST: Servicios/Edit/5
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Policy = "Permiso:ServiciosEditar")]
+    public async Task<IActionResult> Edit(
+        int id,
+        [Bind("IdItem,NombreServicio,PrecioVenta,Estado")] Servicio servicio)
+    {
+        if (id != servicio.IdItem) return NotFound();
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                var servicioDb = await _context.Servicios
+                .FirstOrDefaultAsync(s => s.IdItem == id);
+
+                if (servicioDb == null) return NotFound();
+
+                // Actualizar únicamente los campos editables del servicio.
+                servicioDb.NombreServicio = servicio.NombreServicio;
+                servicioDb.PrecioVenta = servicio.PrecioVenta;
+                servicioDb.Estado = servicio.Estado;
+
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!await _context.Servicios.AnyAsync(e => e.IdItem == servicio.IdItem))
+                    return NotFound();
+                else
+                    throw;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        return View(servicio);
     }
 }

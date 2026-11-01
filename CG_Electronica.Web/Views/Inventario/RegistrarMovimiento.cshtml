@@ -31,10 +31,11 @@
                     <div class="col-md-3 mb-3">
                         <label class="form-label fw-bold">Motivo</label>
                         <select name="motivo" class="form-select" id="motivo" required>
-                            <option value="Entrada por compra">Entrada por compra</option>
-                            <option value="Entrada por devolución de cliente">Entrada por devolución de cliente</option>
-                            <option value="Salida por producto dañado">Salida por producto dañado</option>
-                            <option value="Ajuste de inventario">Ajuste de inventario</option>
+                            <option value="">-- Seleccione un Motivo --</option>
+                            <option value="Entrada por compra" data-tipo="Entrada">Entrada por compra</option>
+                            <option value="Entrada por devolución de cliente" data-tipo="Entrada">Entrada por devolución de cliente</option>
+                            <option value="Salida por producto dañado" data-tipo="Salida">Salida por producto dañado</option>
+                            <option value="Ajuste de inventario" data-tipo="Universal">Ajuste de inventario</option>
                         </select>
                     </div>
                 </div>
@@ -63,3 +64,53 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tipoSelect = document.getElementById("tipoMovimiento");
+            const motivoSelect = document.getElementById("motivo");
+
+            if (!tipoSelect || !motivoSelect) return;
+
+            const opcionesOriginales = Array.from(motivoSelect.options);
+
+            function actualizarMotivos() {
+                const tipoSeleccionado = tipoSelect.value;
+                const motivoActual = motivoSelect.value;
+
+                motivoSelect.innerHTML = "";
+
+                // Mantener siempre la opción por defecto vacía
+                const optionDefault = document.createElement("option");
+                optionDefault.value = "";
+                optionDefault.textContent = "-- Seleccione un Motivo --";
+                motivoSelect.appendChild(optionDefault);
+
+                let motivoAunValido = false;
+
+                opcionesOriginales.forEach(opt => {
+                    if (!opt.value) return; // Omitir la opción por defecto en el loop
+
+                    const categoria = opt.getAttribute("data-tipo");
+
+                    if (!categoria || categoria === "Universal" || categoria === tipoSeleccionado) {
+                        motivoSelect.appendChild(opt);
+
+                        if (opt.value === motivoActual) {
+                            motivoAunValido = true;
+                        }
+                    }
+                });
+
+                if (!motivoAunValido) {
+                    motivoSelect.value = "";
+                }
+            }
+
+            tipoSelect.addEventListener("change", actualizarMotivos);
+            // Ejecutar al cargar por si el navegador mantiene estado anterior
+            actualizarMotivos();
+        });
+    </script>
+}
