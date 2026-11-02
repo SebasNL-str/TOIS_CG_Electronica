@@ -1,58 +1,42 @@
-/*using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using CG_Electronica.Web.Services; // Ajusta según tu carpeta de servicios
-using CG_Electronica.Web.Models.ViewModels;// Ajusta según tu carpeta de ViewModels
+using CG_Electronica.Web.Data;
+using CG_Electronica.Web.Models.ViewModels;
+using CG_Electronica.Web.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
-namespace CG_Electronica.Web.Controllers
+namespace CG_Electronica.Web.Controllers;
+
+[Authorize(Policy = "Permiso:Ventas.Ver")]
+public class VentasController : Controller
 {
-    // OBLIGATORIO: Protege todo el controlador para que solo entren usuarios logueados
-    [Authorize]
-    public class VentasController : Controller
+    private readonly AppDbContext _context;
+    private readonly IServicioVentas _servicioVentas;
+
+    public VentasController(AppDbContext context, IServicioVentas servicioVentas)
+    { _context = context; _servicioVentas = servicioVentas; }
+
+    [HttpGet]
+    public async Task<IActionResult> Crear()
     {
-        private readonly IServicioVentas _servicioVentas;
+        ViewBag.Clientes = new SelectList(await _context.Clientes.Where(c => c.Estado == "Activo").OrderBy(c => c.NombreCliente).ToListAsync(), "IdCliente", "NombreCliente");
+        ViewBag.Items = await _context.ItemsFacturables.Where(i => i.Estado == "Activo").OrderBy(i => i.IdItem).ToListAsync();
+        return View();
+    }
 
-        public VentasController(IServicioVentas servicioVentas)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RegistrarVenta([FromBody] VentaRequestDTO request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var idUsuario)) return Unauthorized(new { success = false, mensaje = "Sesión inválida o expirada." });
+        try
         {
-            _servicioVentas = servicioVentas;
+            var factura = await _servicioVentas.RegistrarVentaAsync(request, idUsuario);
+            return Ok(new { success = true, facturaId = factura.IdFactura, mensaje = "Venta registrada con éxito." });
         }
-
-        // GET: /Ventas/Crear
-        public IActionResult Crear()
-        {
-            return View();
-        }
-
-        // POST: /Ventas/RegistrarVenta
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RegistrarVenta([FromBody] VentaRequestDTO request)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            try
-            {
-                // === LECTURA DEL USUARIO ACTIVO ===
-                // Buscamos exactamente el ClaimTypes.NameIdentifier que el Integrante 1 guardó en el AccountController
-                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-                // Intentamos parsear el string del Claim a int (ya que Usuario.IdUsuario es int)
-                if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int idUsuario))
-                {
-                    return Unauthorized(new { success = false, mensaje = "Sesión inválida o expirada." });
-                }
-
-                // Ahora sí, inyectamos el idUsuario 100% real al servicio transaccional
-                var factura = await _servicioVentas.RegistrarVentaAsync(request, idUsuario);
-
-                return Json(new { success = true, facturaId = factura.IdFactura, mensaje = "Venta registrada con éxito." });
-            }
-            catch (Exception ex)
-            {
-                // Manejo del rollback/error: le devolvemos al frontend qué falló (ej. "Stock insuficiente")
-                return Json(new { success = false, mensaje = ex.Message });
-            }
-        }
+        catch (Exception ex) { return BadRequest(new { success = false, mensaje = ex.Message }); }
     }
 }
-*/
