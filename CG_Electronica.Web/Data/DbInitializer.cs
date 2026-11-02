@@ -11,20 +11,18 @@ public static class DbInitializer
         var hasher = new PasswordHasher<Usuario>();
 
         // ---------- PERMISOS (solo si no existen) ----------
-        if (!context.Permisos.Any())
+        var permisosBase = new[]
         {
-            context.Permisos.AddRange(
-                new Permiso { NombrePermiso = "Usuarios.Ver", Descripcion = "Ver usuarios" },
-                new Permiso { NombrePermiso = "Usuarios.Editar", Descripcion = "Crear, editar y eliminar usuarios" },
-                new Permiso { NombrePermiso = "Roles.Ver", Descripcion = "Ver roles" },
-                new Permiso { NombrePermiso = "Roles.Editar", Descripcion = "Gestionar roles y permisos" },
-                new Permiso { NombrePermiso = "Catalogos.Ver", Descripcion = "Ver marcas y categorías" },
-                new Permiso { NombrePermiso = "Catalogos.Editar", Descripcion = "Gestionar marcas y categorías" },
-                new Permiso { NombrePermiso = "Clientes.Ver", Descripcion = "Ver clientes" },
-                new Permiso { NombrePermiso = "Clientes.Editar", Descripcion = "Gestionar clientes" }
-            );
-            context.SaveChanges();
-        }
+            ("Usuarios.Ver", "Ver usuarios"), ("Usuarios.Editar", "Crear, editar y eliminar usuarios"),
+            ("Roles.Ver", "Ver roles"), ("Roles.Editar", "Gestionar roles y permisos"),
+            ("Catalogos.Ver", "Ver marcas y categorías"), ("Catalogos.Editar", "Gestionar marcas y categorías"),
+            ("Clientes.Ver", "Ver clientes"), ("Clientes.Editar", "Gestionar clientes"),
+            ("Ventas.Ver", "Registrar ventas"), ("Facturas.Ver", "Consultar facturas"),
+            ("Facturas.Anular", "Anular facturas"),
+            ("Reportes.Ver", "Consultar reportes")
+        };
+        var permisosFaltantesIniciales = permisosBase.Where(p => !context.Permisos.Any(db => db.NombrePermiso == p.Item1)).Select(p => new Permiso { NombrePermiso = p.Item1, Descripcion = p.Item2 }).ToList();
+        if (permisosFaltantesIniciales.Count > 0) { context.Permisos.AddRange(permisosFaltantesIniciales); context.SaveChanges(); }
 
         // ---------- ROL ADMINISTRADOR ----------
         var rolAdmin = context.Roles

@@ -317,15 +317,26 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Factura>()
         .Property(f => f.Iva)
+        .HasColumnName("iva")
         .HasPrecision(18, 2);
 
         modelBuilder.Entity<Factura>()
         .Property(f => f.Subtotal)
+        .HasColumnName("subtotal")
         .HasPrecision(18, 2);
 
         modelBuilder.Entity<Factura>()
         .Property(f => f.Total)
+        .HasColumnName("total")
         .HasPrecision(18, 2);
+
+        modelBuilder.Entity<Factura>().Property(f => f.NumeroFactura).HasColumnName("numeroFactura").HasMaxLength(50).IsRequired();
+        modelBuilder.Entity<Factura>().Property(f => f.Fecha).HasColumnName("fecha");
+        modelBuilder.Entity<Factura>().Property(f => f.Estado).HasColumnName("estado").HasMaxLength(30).IsRequired();
+        modelBuilder.Entity<Factura>().Property(f => f.FechaAnulacion).HasColumnName("fechaAnulacion");
+        modelBuilder.Entity<Factura>().Property(f => f.NombreClienteHistorico).HasColumnName("nombreClienteHistorico").HasMaxLength(150);
+        modelBuilder.Entity<Factura>().Property(f => f.TelefonoClienteHistorico).HasColumnName("telefonoClienteHistorico").HasMaxLength(30);
+        modelBuilder.Entity<Factura>().Property(f => f.CedulaClienteHistorica).HasColumnName("cedulaClienteHistorica").HasMaxLength(50);
 
         modelBuilder.Entity<Factura>()
         .HasOne(f => f.Usuario)
@@ -358,7 +369,12 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<DetalleFactura>()
         .Property(d => d.PrecioUnitarioHistorico)
+        .HasColumnName("precioUnitarioHistorico")
         .HasPrecision(18, 2);
+
+        modelBuilder.Entity<DetalleFactura>().Property(d => d.Cantidad).HasColumnName("cantidad").IsRequired();
+        modelBuilder.Entity<DetalleFactura>().Property(d => d.IdFactura).HasColumnName("idFactura");
+        modelBuilder.Entity<DetalleFactura>().Property(d => d.IdItem).HasColumnName("idItem");
 
         // Un mismo item no puede repetirse en varias líneas
         // de una misma factura.
