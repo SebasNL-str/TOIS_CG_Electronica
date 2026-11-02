@@ -15,17 +15,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
-// --- INICIO REGISTRO DE SERVICIOS (LÓGICA DE NEGOCIO) ---
-
-// TODO: Registro de los servicios del Integrante 2 (Fase 2 - Inventario y Auditoría)
-// Cuando el Integrante 2 integre su rama, debe descomentar/agregar sus servicios aquí:
-// builder.Services.AddScoped<IServicioInventario, ServicioInventario>();
-// builder.Services.AddScoped<IServicioAuditoria, ServicioAuditoria>();
-
-// NUEVO - Registro de tu Servicio de Ventas (Fase 3 - Facturación)[cite: 7]
-//builder.Services.AddScoped<IServicioVentas, ServicioVentas>();
-
-// --- FIN REGISTRO DE SERVICIOS ---
+// Servicios de negocio: inventario, auditoría y ventas comparten el mismo DbContext por solicitud.
 
 
 // NUEVO - Autenticación con cookies[cite: 11]
@@ -45,6 +35,7 @@ builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermisoPolicyProvide
 builder.Services.AddScoped<IAuthorizationHandler, PermisoHandler>();
 builder.Services.AddScoped<IServicioAuditoria, ServicioAuditoria>();
 builder.Services.AddScoped<IServicioInventario, ServicioInventario>();
+builder.Services.AddScoped<IServicioVentas, ServicioVentas>();
 
 
 var app = builder.Build();
