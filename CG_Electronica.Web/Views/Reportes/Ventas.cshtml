@@ -1,0 +1,21 @@
+@model CG_Electronica.Web.Models.ViewModels.ReporteVentasViewModel
+@{ ViewData["Title"] = "Reportes de ventas"; }
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Reportes de ventas</h1>
+    <form method="get" class="row g-3 align-items-end mb-4">
+        <div class="col-md-3"><label asp-for="Desde" class="form-label">Desde</label><input asp-for="Desde" type="date" class="form-control" /></div>
+        <div class="col-md-3"><label asp-for="Hasta" class="form-label">Hasta</label><input asp-for="Hasta" type="date" class="form-control" /></div>
+        <div class="col-md-2"><button class="btn btn-primary w-100">Consultar</button></div>
+    </form>
+    <div class="row g-3 mb-4">
+        <div class="col-md-4"><div class="card bg-primary text-white"><div class="card-body"><small>Facturas emitidas</small><h2>@Model.CantidadFacturas</h2></div></div></div>
+        <div class="col-md-4"><div class="card bg-success text-white"><div class="card-body"><small>Total vendido</small><h2>$@Model.TotalVendido.ToString("N2")</h2></div></div></div>
+        <div class="col-md-4"><div class="card bg-warning"><div class="card-body"><small>Productos bajo mínimo</small><h2>@Model.BajoStock.Count</h2></div></div></div>
+    </div>
+    <div class="row g-4">
+        <div class="col-lg-6"><div class="card"><div class="card-header">Artículos con mayor movimiento</div><div class="card-body"><table class="table table-sm"><thead><tr><th>Artículo</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>@foreach (var item in Model.MasVendidos) { <tr><td>@item.Nombre</td><td>@item.Cantidad</td><td>$@item.Importe.ToString("N2")</td></tr>}</tbody></table></div></div></div>
+        <div class="col-lg-6"><div class="card"><div class="card-header">Existencias bajo mínimo</div><div class="card-body"><table class="table table-sm"><thead><tr><th>Producto</th><th>Actual</th><th>Mínimo</th></tr></thead><tbody>@foreach (var item in Model.BajoStock) { <tr><td>@item.Nombre</td><td>@item.Existencias</td><td>@item.Minimo</td></tr>}</tbody></table></div></div></div>
+    </div>
+    <div class="card mt-4"><div class="card-header">Historial de facturas del período</div><div class="card-body table-responsive"><table class="table table-striped"><thead><tr><th>Factura</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead><tbody>@foreach (var factura in Model.Facturas) { <tr><td>@factura.Numero</td><td>@factura.Fecha.ToString("yyyy-MM-dd HH:mm")</td><td>@factura.Cliente</td><td>$@factura.Total.ToString("N2")</td><td>@factura.Estado</td></tr>}</tbody></table></div></div>
+</div>

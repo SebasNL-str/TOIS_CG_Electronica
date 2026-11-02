@@ -34,9 +34,13 @@
 
                 <div class="row g-3 align-items-end mb-3">
                     <div class="col-md-6">
-                        <label class="form-label">Seleccionar Producto</label>
-                        <select id="selectProducto" class="form-select" asp-items="ViewBag.Productos">
-                            <option value="">-- Seleccione Producto --</option>
+                        <label class="form-label">Seleccionar artículo</label>
+                        <select id="selectProducto" class="form-select">
+                            <option value="">-- Seleccione producto o servicio --</option>
+                            @foreach (var item in ViewBag.Items)
+                            {
+                                <option value="@item.IdItem" data-precio="@item.PrecioVenta">@item.Nombre — $@item.PrecioVenta.ToString("N2")</option>
+                            }
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -105,7 +109,9 @@
             const inputCantidad = document.getElementById('inputCantidad');
 
             const idItem = selectProducto.value;
-            const descripcionItem = selectProducto.options[selectProducto.selectedIndex].text;
+            const opcion = selectProducto.options[selectProducto.selectedIndex];
+            const descripcionItem = opcion.text;
+            const precio = parseFloat(opcion.dataset.precio || '0');
             const cantidad = parseInt(inputCantidad.value);
 
             if (!idItem) {
@@ -133,6 +139,7 @@
                 itemsFactura.push({
                     idItem: idItem,
                     descripcion: descripcionItem,
+                    precio: precio,
                     cantidad: cantidad
                 });
             }
@@ -155,7 +162,7 @@
                         ${item.cantidad}
                         <input type="hidden" name="items[${index}].Cantidad" value="${item.cantidad}" />
                     </td>
-                    <td class="text-end">N/D</td>
+                    <td class="text-end">$${(item.precio * item.cantidad).toFixed(2)}</td>
                     <td class="text-center">
                         <button type="button" class="btn btn-danger btn-sm" onclick="eliminarItem(${index})">
                             <i class="fas fa-trash"></i>
@@ -164,6 +171,11 @@
                 `;
                 tbody.appendChild(tr);
             });
+            const subtotal = itemsFactura.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+            const iva = subtotal * 0.15;
+            document.getElementById('lblSubtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('lblIva').textContent = `$${iva.toFixed(2)}`;
+            document.getElementById('lblTotal').textContent = `$${(subtotal + iva).toFixed(2)}`;
         }
 
         function eliminarItem(index) {

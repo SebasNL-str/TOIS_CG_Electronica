@@ -19,6 +19,34 @@
             </a>
         </div>
         <div class="card-body">
+            <form method="get" class="row g-2 mb-3">
+                <div class="col-md-5">
+                    <input name="busqueda" value="@ViewBag.Busqueda" class="form-control" placeholder="Buscar por número o cliente" />
+                </div>
+                <div class="col-md-3">
+                    <select name="estado" class="form-select">
+                        <option value="">Todos los estados</option>
+                        @if (ViewBag.Estado == "Emitida")
+                        {
+                            <option value="Emitida" selected>Emitida</option>
+                        }
+                        else
+                        {
+                            <option value="Emitida">Emitida</option>
+                        }
+                        @if (ViewBag.Estado == "Anulada")
+                        {
+                            <option value="Anulada" selected>Anulada</option>
+                        }
+                        else
+                        {
+                            <option value="Anulada">Anulada</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2"><button class="btn btn-outline-primary w-100">Filtrar</button></div>
+                <div class="col-md-2"><a asp-action="Index" class="btn btn-outline-secondary w-100">Limpiar</a></div>
+            </form>
             <div class="table-responsive">
                 <table class="table table-bordered table-striped align-middle">
                     <thead class="table-dark">

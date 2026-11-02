@@ -30,7 +30,7 @@
                             </li>
 
                             <!-- DROPDOWN: GESTIÓN COMERCIAL -->
-                            @if (User.TienePermiso("Catalogos.Ver") || User.TienePermiso("Clientes.Ver") || User.TienePermiso("Ventas.Ver") || User.TienePermiso("Facturas.Ver"))
+                            @if (User.TienePermiso("Catalogos.Ver") || User.TienePermiso("Clientes.Ver") || User.TienePermiso("Ventas.Ver") || User.TienePermiso("Facturas.Ver") || User.TienePermiso("Reportes.Ver"))
                             {
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-light" href="#" id="comercialDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -49,6 +49,10 @@
                                         @if (User.TienePermiso("Ventas.Ver") || User.TienePermiso("Facturas.Ver"))
                                         {
                                             <li><a class="dropdown-item" asp-controller="Facturas" asp-action="Index"><i class="fas fa-file-invoice-dollar me-2"></i> Facturación</a></li>
+                                        }
+                                        @if (User.TienePermiso("Reportes.Ver"))
+                                        {
+                                            <li><a class="dropdown-item" asp-controller="Reportes" asp-action="Ventas"><i class="fas fa-chart-line me-2"></i> Reportes</a></li>
                                         }
                                     </ul>
                                 </li>

@@ -12,6 +12,14 @@
     </ol>
 
     <div class="card mb-4">
+        @if (TempData["Mensaje"] is string mensaje)
+        {
+            <div class="alert alert-success m-3">@mensaje</div>
+        }
+        @if (TempData["Error"] is string error)
+        {
+            <div class="alert alert-danger m-3">@error</div>
+        }
         <div class="card-header d-flex justify-content-between align-items-center">
             <div><i class="fas id-card me-1"></i> Información General</div>
             <div>
@@ -47,7 +55,20 @@
                         {
                             var subtotalLinea = det.Cantidad * det.PrecioUnitarioHistorico;
                             <tr>
-                                <td>@det.Item?.GetType().Name - ID: @det.IdItem</td>
+                                <td>
+                                    @if (det.Item is CG_Electronica.Web.Models.Producto producto)
+                                    {
+                                        @producto.Descripcion
+                                    }
+                                    else if (det.Item is CG_Electronica.Web.Models.Servicio servicio)
+                                    {
+                                        @servicio.NombreServicio
+                                    }
+                                    else
+                                    {
+                                        @:Ítem @det.IdItem
+                                    }
+                                </td>
                                 <td class="text-center">@det.Cantidad</td>
                                 <td class="text-end">$@det.PrecioUnitarioHistorico.ToString("N2")</td>
                                 <td class="text-end">$@subtotalLinea.ToString("N2")</td>
@@ -76,6 +97,12 @@
             </div>
 
             <div class="mt-4">
+                @if (Model.Estado == "Emitida")
+                {
+                    <form asp-action="Anular" asp-route-id="@Model.IdFactura" method="post" class="d-inline" onsubmit="return confirm('¿Confirma la anulación de esta factura?');">
+                        <button type="submit" class="btn btn-danger"><i class="fas fa-ban"></i> Anular factura</button>
+                    </form>
+                }
                 <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver al Listado</a>
             </div>
         </div>
