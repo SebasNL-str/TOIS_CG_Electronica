@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CG_Electronica.Web.Controllers;
 
@@ -49,6 +50,8 @@ public class ProductosController : Controller
 
         if (ModelState.IsValid)
         {
+            int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+
             // 1. Crear el ItemFacturable base
             producto.Existencias = 0; // Se inicializa mediante movimiento de entrada inicial
             producto.PrecioCompra = precioCompraInicial;
@@ -58,12 +61,10 @@ public class ProductosController : Controller
             // 2. Si hay stock inicial, registrar la entrada mediante el servicio de inventario
             if (stockInicial > 0)
             {
-                int idUsuario = HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value != null
-                ? int.Parse(HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value)
-                : 1; // Ajustar según claims de sesión
-
                 await _servicioInventario.RegistrarEntradaAsync(producto.IdItem, stockInicial, precioCompraInicial, "Entrada por compra", idUsuario, "Inventario inicial de creación");
             }
+
+            await _servicioAuditoria.RegistrarAccionAsync("CREAR_PRODUCTO", $"PRODUCTO: {producto.IdItem}", $"Se creó el producto {producto.Descripcion}.", idUsuario);
 
             return RedirectToAction(nameof(Index));
         }
@@ -117,6 +118,9 @@ public class ProductosController : Controller
 
                 _context.Update(producto);
                 await _context.SaveChangesAsync();
+
+                int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+                await _servicioAuditoria.RegistrarAccionAsync("EDITAR_PRODUCTO", $"PRODUCTO: {producto.IdItem}", $"Se modificó el producto {producto.Descripcion}.", idUsuario);
             }
             catch (DbUpdateConcurrencyException)
             {

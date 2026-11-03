@@ -1,9 +1,11 @@
 ﻿using CG_Electronica.Web.Data;
 using CG_Electronica.Web.Models;
 using CG_Electronica.Web.Models.ViewModels;
+using CG_Electronica.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CG_Electronica.Web.Controllers
 {
@@ -11,10 +13,12 @@ namespace CG_Electronica.Web.Controllers
     public class RolesController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IServicioAuditoria _servicioAuditoria;
 
-        public RolesController(AppDbContext context)
+        public RolesController(AppDbContext context, IServicioAuditoria servicioAuditoria)
         {
             _context = context;
+            _servicioAuditoria = servicioAuditoria;
         }
 
         // 1. GET: Listado de Roles
@@ -100,6 +104,10 @@ namespace CG_Electronica.Web.Controllers
                     }
 
                     await _context.SaveChangesAsync();
+
+                    int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+                    await _servicioAuditoria.RegistrarAccionAsync("CREAR_ROL", $"ROL: {nuevoRol.IdRol}", $"Se creó el rol {nuevoRol.NombreRol}.", idUsuario);
+
                     TempData["Ok"] = "Rol creado exitosamente.";
                     return RedirectToAction(nameof(Index));
                 }
@@ -195,6 +203,9 @@ namespace CG_Electronica.Web.Controllers
                     _context.Update(rolDb);
                     await _context.SaveChangesAsync();
 
+                    int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+                    await _servicioAuditoria.RegistrarAccionAsync("EDITAR_ROL", $"ROL: {rolDb.IdRol}", $"Se actualizó el rol {rolDb.NombreRol} y sus permisos asignados.", idUsuario);
+
                     TempData["Ok"] = "Rol actualizado exitosamente.";
                     return RedirectToAction(nameof(Index));
                 }
@@ -244,8 +255,13 @@ namespace CG_Electronica.Web.Controllers
 
                 try
                 {
+                    string nombreRolEliminado = rol.NombreRol;
                     _context.Roles.Remove(rol);
                     await _context.SaveChangesAsync();
+
+                    int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+                    await _servicioAuditoria.RegistrarAccionAsync("ELIMINAR_ROL", $"ROL: {id}", $"Se eliminó el rol {nombreRolEliminado}.", idUsuario);
+
                     TempData["Ok"] = "Rol eliminado exitosamente.";
                 }
                 catch (DbUpdateException)

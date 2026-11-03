@@ -1,10 +1,12 @@
 ﻿using CG_Electronica.Web.Data;
 using CG_Electronica.Web.Models;
+using CG_Electronica.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity; // Para PasswordHasher
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering; // Para los SelectList
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CG_Electronica.Web.Controllers
 {
@@ -12,10 +14,12 @@ namespace CG_Electronica.Web.Controllers
     public class UsuariosController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IServicioAuditoria _servicioAuditoria;
 
-        public UsuariosController(AppDbContext context)
+        public UsuariosController(AppDbContext context, IServicioAuditoria servicioAuditoria)
         {
             _context = context;
+            _servicioAuditoria = servicioAuditoria;
         }
 
         // Listado de usuarios, requiere permiso de Ver
@@ -90,6 +94,9 @@ namespace CG_Electronica.Web.Controllers
                     _context.Add(nuevoUsuario);
                     await _context.SaveChangesAsync();
 
+                    int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+                    await _servicioAuditoria.RegistrarAccionAsync("CREAR_USUARIO", $"USUARIO: {nuevoUsuario.IdUsuario}", $"Se creó el usuario {nuevoUsuario.NombreUsuario}.", idUsuario);
+
                     TempData["Ok"] = "Usuario creado exitosamente.";
                     return RedirectToAction(nameof(Index));
                 }
@@ -161,6 +168,9 @@ namespace CG_Electronica.Web.Controllers
                     _context.Update(usuarioDb);
                     await _context.SaveChangesAsync();
 
+                    int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+                    await _servicioAuditoria.RegistrarAccionAsync("EDITAR_USUARIO", $"USUARIO: {usuarioDb.IdUsuario}", $"Se actualizó el usuario {usuarioDb.NombreUsuario}.", idUsuario);
+
                     TempData["Ok"] = "Usuario actualizado exitosamente.";
                     return RedirectToAction(nameof(Index));
                 }
@@ -209,8 +219,13 @@ namespace CG_Electronica.Web.Controllers
 
                 try
                 {
+                    string nombreUsuarioEliminado = usuario.NombreUsuario;
                     _context.Usuarios.Remove(usuario);
                     await _context.SaveChangesAsync();
+
+                    int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+                    await _servicioAuditoria.RegistrarAccionAsync("ELIMINAR_USUARIO", $"USUARIO: {id}", $"Se eliminó el usuario {nombreUsuarioEliminado}.", idUsuario);
+
                     TempData["Ok"] = "Usuario eliminado exitosamente.";
                 }
                 catch (DbUpdateException)
