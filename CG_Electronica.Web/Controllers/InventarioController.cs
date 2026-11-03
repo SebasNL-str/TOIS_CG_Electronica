@@ -26,9 +26,9 @@ public class InventarioController : Controller
         ViewBag.Productos = new SelectList(_context.Productos, "IdItem", "Descripcion", idProducto);
 
         var query = _context.MovimientosInventario
-        .Include(m => m.Producto)
-        .Include(m => m.Usuario)
-        .AsQueryable();
+            .Include(m => m.Producto)
+            .Include(m => m.Usuario)
+            .AsQueryable();
 
         if (idProducto.HasValue)
         {
@@ -52,7 +52,16 @@ public class InventarioController : Controller
     {
         try
         {
-            // Validación robusta y consistente con los valores reales enviados por la vista
+            // Validación de observación obligatoria
+            if (string.IsNullOrWhiteSpace(observacion))
+            {
+                ModelState.AddModelError(
+                    "observacion",
+                    "La observación es obligatoria. Por favor, ingrese una observación para registrar el movimiento."
+                );
+            }
+
+            // Validación de compatibilidad Tipo de movimiento vs Motivo
             if (tipoMovimiento == "Entrada")
             {
                 if (motivo != "Entrada por compra" &&
@@ -93,6 +102,7 @@ public class InventarioController : Controller
                     "Descripcion",
                     idProducto
                 );
+                ViewBag.Observacion = observacion;
 
                 return View();
             }
@@ -115,6 +125,7 @@ public class InventarioController : Controller
         {
             ModelState.AddModelError("", ex.Message);
             ViewBag.Productos = new SelectList(_context.Productos, "IdItem", "Descripcion", idProducto);
+            ViewBag.Observacion = observacion;
             return View();
         }
     }
