@@ -64,7 +64,15 @@ public sealed class ServicioVentas : IServicioVentas
                 if (items.Single(i => i.IdItem == detalle.IdItem) is Producto producto)
                     await _servicioInventario.RegistrarSalidaAsync(producto.IdItem, detalle.Cantidad, "Salida por venta", idUsuario, $"Factura N°: {factura.NumeroFactura}");
             }
-            await _servicioAuditoria.RegistrarAccionAsync("EMITIR_FACTURA", $"FACTURA: {factura.NumeroFactura}", idUsuario, $"Venta por ${factura.Total:N2}");
+            
+            // Corrección en RegistrarAccionAsync (Emitir Venta): Orden corregido -> (Acción, Entidad, Descripción, IdUsuario)
+            await _servicioAuditoria.RegistrarAccionAsync(
+                "EMITIR_FACTURA", 
+                $"FACTURA: {factura.NumeroFactura}", 
+                $"Venta por ${factura.Total:N2}", 
+                idUsuario
+            );
+
             await transaction.CommitAsync();
             return factura;
         }
@@ -86,7 +94,15 @@ public sealed class ServicioVentas : IServicioVentas
                     await _servicioInventario.RegistrarEntradaAsync(producto.IdItem, detalle.Cantidad, producto.PrecioCompra, "Entrada por devolución de cliente", idUsuario, $"Anulación factura N°: {factura.NumeroFactura}");
             }
             await _context.SaveChangesAsync();
-            await _servicioAuditoria.RegistrarAccionAsync("ANULAR_FACTURA", $"FACTURA: {factura.NumeroFactura}", idUsuario);
+            
+            // Corrección en RegistrarAccionAsync (Anular Venta): Se agregaron los 4 argumentos obligatorios (Acción, Entidad, Descripción, IdUsuario)
+            await _servicioAuditoria.RegistrarAccionAsync(
+                "ANULAR_FACTURA", 
+                $"FACTURA: {factura.NumeroFactura}", 
+                $"Se anuló la factura N°: {factura.NumeroFactura}", 
+                idUsuario
+            );
+
             await transaction.CommitAsync();
         }
         catch { await transaction.RollbackAsync(); throw; }

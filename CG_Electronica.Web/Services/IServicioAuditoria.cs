@@ -1,6 +1,9 @@
+using System.Threading.Tasks;
+
 namespace CG_Electronica.Web.Services;
 
 public interface IServicioAuditoria
 {
-    Task RegistrarAccionAsync(string accion, string registroAfectado, int idUsuario, string? observacion = null);
+    Task RegistrarAsync(string accion, string registroAfectado, string observacion, int idUsuario);
+    Task RegistrarAccionAsync(string accion, string registroAfectado, string observacion, int idUsuario);
 }

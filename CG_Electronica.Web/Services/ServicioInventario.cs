@@ -1,6 +1,10 @@
 using CG_Electronica.Web.Data;
 using CG_Electronica.Web.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace CG_Electronica.Web.Services;
 
@@ -17,168 +21,127 @@ public class ServicioInventario : IServicioInventario
 
     public async Task RegistrarEntradaAsync(int idProducto, int cantidad, decimal precioCompraUnitario, string motivo, int idUsuario, string? observacion = null)
     {
-        if (cantidad <= 0) throw new ArgumentException("La cantidad debe ser mayor a cero.", nameof(cantidad));
+        var producto = await _context.Productos.FindAsync(idProducto);
+        if (producto == null)
+            throw new InvalidOperationException("El producto especificado no existe.");
 
-        // Reutiliza la transacción existente si la hay; de lo contrario, crea una nueva
-        var existingTransaction = _context.Database.CurrentTransaction;
-        var transaction = existingTransaction == null ? await _context.Database.BeginTransactionAsync() : null;
-        try
+        if (cantidad <= 0)
+            throw new InvalidOperationException("La cantidad debe ser mayor a cero.");
+
+        // Actualizar existencias y costo
+        producto.Existencias += cantidad;
+        producto.PrecioCompra = precioCompraUnitario;
+
+        var movimiento = new MovimientoInventario
         {
-            var producto = await _context.Productos.FindAsync(idProducto);
-            if (producto == null) throw new KeyNotFoundException("El producto especificado no existe.");
+            IdProducto = idProducto,
+            TipoMovimiento = "Entrada",
+            Motivo = motivo,
+            Cantidad = cantidad,
+            PrecioCompraUnitario = precioCompraUnitario,
+            FechaHora = DateTime.Now,
+            IdUsuario = idUsuario,
+            Observacion = observacion
+        };
 
-            producto.Existencias += cantidad;
-            producto.PrecioCompra = precioCompraUnitario;
+        _context.MovimientosInventario.Add(movimiento);
+        _context.Productos.Update(producto);
+        await _context.SaveChangesAsync();
 
-            var movimiento = new MovimientoInventario
-            {
-                TipoMovimiento = "Entrada",
-                Motivo = motivo,
-                Cantidad = cantidad,
-                PrecioCompraUnitario = precioCompraUnitario,
-                IdProducto = idProducto,
-                IdUsuario = idUsuario,
-                Observacion = observacion,
-                FechaHora = DateTime.Now
-            };
-
-            _context.MovimientosInventario.Add(movimiento);
-            await _context.SaveChangesAsync();
-
-            await _servicioAuditoria.RegistrarAccionAsync(
-                "ENTRADA_INVENTARIO",
-                $"PRODUCTO: {idProducto}, Cantidad: {cantidad}",
-                idUsuario,
-                observacion ?? $"Entrada por {motivo}"
-            );
-
-            if (transaction != null) await transaction.CommitAsync();
-        }
-        catch
-        {
-            if (transaction != null) await transaction.RollbackAsync();
-            throw;
-        }
-        finally
-        {
-            transaction?.Dispose();
-        }
+        // Auditoría
+        await _servicioAuditoria.RegistrarAccionAsync(
+            "ENTRADA_INVENTARIO",
+            $"PRODUCTO: {idProducto}",
+            $"Entrada de {cantidad} unidades por '{motivo}'. Obs: {observacion ?? "Sin observación"}",
+            idUsuario
+        );
     }
 
     public async Task RegistrarSalidaAsync(int idProducto, int cantidad, string motivo, int idUsuario, string? observacion = null)
     {
-        if (cantidad <= 0) throw new ArgumentException("La cantidad debe ser mayor a cero.", nameof(cantidad));
+        var producto = await _context.Productos.FindAsync(idProducto);
+        if (producto == null)
+            throw new InvalidOperationException("El producto especificado no existe.");
 
-        // Reutiliza la transacción existente si la hay; de lo contrario, crea una nueva
-        var existingTransaction = _context.Database.CurrentTransaction;
-        var transaction = existingTransaction == null ? await _context.Database.BeginTransactionAsync() : null;
-        try
+        if (cantidad <= 0)
+            throw new InvalidOperationException("La cantidad debe ser mayor a cero.");
+
+        if (producto.Existencias < cantidad)
+            throw new InvalidOperationException($"Stock insuficiente. Existencias actuales: {producto.Existencias}, Cantidad solicitada: {cantidad}");
+
+        // Actualizar existencias
+        producto.Existencias -= cantidad;
+
+        var movimiento = new MovimientoInventario
         {
-            var producto = await _context.Productos.FindAsync(idProducto);
-            if (producto == null) throw new KeyNotFoundException("El producto especificado no existe.");
+            IdProducto = idProducto,
+            TipoMovimiento = "Salida",
+            Motivo = motivo,
+            Cantidad = cantidad,
+            PrecioCompraUnitario = producto.PrecioCompra,
+            FechaHora = DateTime.Now,
+            IdUsuario = idUsuario,
+            Observacion = observacion
+        };
 
-            // Validación estricta de stock disponible
-            if (producto.Existencias < cantidad)
-            {
-                throw new InvalidOperationException($"Stock insuficiente para '{producto.Descripcion}'. Stock actual: {producto.Existencias}, Cantidad solicitada: {cantidad}.");
-            }
+        _context.MovimientosInventario.Add(movimiento);
+        _context.Productos.Update(producto);
+        await _context.SaveChangesAsync();
 
-            producto.Existencias -= cantidad;
-
-            var movimiento = new MovimientoInventario
-            {
-                TipoMovimiento = "Salida",
-                Motivo = motivo,
-                Cantidad = cantidad,
-                PrecioCompraUnitario = producto.PrecioCompra,
-                IdProducto = idProducto,
-                IdUsuario = idUsuario,
-                Observacion = observacion,
-                FechaHora = DateTime.Now
-            };
-
-            _context.MovimientosInventario.Add(movimiento);
-            await _context.SaveChangesAsync();
-
-            await _servicioAuditoria.RegistrarAccionAsync(
-                "SALIDA_INVENTARIO",
-                $"PRODUCTO: {idProducto}, Cantidad: {cantidad}",
-                idUsuario,
-                observacion ?? $"Salida por {motivo}"
-            );
-
-            if (transaction != null) await transaction.CommitAsync();
-        }
-        catch
-        {
-            if (transaction != null) await transaction.RollbackAsync();
-            throw;
-        }
-        finally
-        {
-            transaction?.Dispose();
-        }
+        // Auditoría
+        await _servicioAuditoria.RegistrarAccionAsync(
+            "SALIDA_INVENTARIO",
+            $"PRODUCTO: {idProducto}",
+            $"Salida de {cantidad} unidades por '{motivo}'. Obs: {observacion ?? "Sin observación"}",
+            idUsuario
+        );
     }
 
-    public async Task RegistrarAjusteAsync(int idProducto, int nuevaExistencia, int idUsuario, string observacion)
+    public async Task RegistrarAjusteAsync(int idProducto, int nuevaCantidad, int idUsuario, string observacion)
     {
-        if (nuevaExistencia < 0) throw new ArgumentException("Las existencias no pueden ser negativas.", nameof(nuevaExistencia));
+        var producto = await _context.Productos.FindAsync(idProducto);
+        if (producto == null)
+            throw new InvalidOperationException("El producto especificado no existe.");
 
-        // Reutiliza la transacción existente si la hay; de lo contrario, crea una nueva
-        var existingTransaction = _context.Database.CurrentTransaction;
-        var transaction = existingTransaction == null ? await _context.Database.BeginTransactionAsync() : null;
-        try
+        int diferencia = nuevaCantidad - producto.Existencias;
+        if (diferencia == 0) return;
+
+        string tipo = diferencia > 0 ? "Entrada" : "Salida";
+        int cantidadAbs = Math.Abs(diferencia);
+
+        producto.Existencias = nuevaCantidad;
+
+        var movimiento = new MovimientoInventario
         {
-            var producto = await _context.Productos.FindAsync(idProducto);
-            if (producto == null) throw new KeyNotFoundException("El producto especificado no existe.");
+            IdProducto = idProducto,
+            TipoMovimiento = tipo,
+            Motivo = "Ajuste de inventario",
+            Cantidad = cantidadAbs,
+            PrecioCompraUnitario = producto.PrecioCompra,
+            FechaHora = DateTime.Now,
+            IdUsuario = idUsuario,
+            Observacion = observacion
+        };
 
-            int diferencia = nuevaExistencia - producto.Existencias;
-            if (diferencia == 0) return;
+        _context.MovimientosInventario.Add(movimiento);
+        _context.Productos.Update(producto);
+        await _context.SaveChangesAsync();
 
-            string tipoMovimiento = diferencia > 0 ? "Entrada" : "Salida";
-            int cantidadMovimiento = Math.Abs(diferencia);
-
-            producto.Existencias = nuevaExistencia;
-
-            var movimiento = new MovimientoInventario
-            {
-                TipoMovimiento = tipoMovimiento,
-                Motivo = "Ajuste de inventario",
-                Cantidad = cantidadMovimiento,
-                PrecioCompraUnitario = producto.PrecioCompra,
-                IdProducto = idProducto,
-                IdUsuario = idUsuario,
-                Observacion = observacion,
-                FechaHora = DateTime.Now
-            };
-
-            _context.MovimientosInventario.Add(movimiento);
-            await _context.SaveChangesAsync();
-
-            await _servicioAuditoria.RegistrarAccionAsync(
-                "AJUSTE_INVENTARIO",
-                $"PRODUCTO: {idProducto}, Ajuste a: {nuevaExistencia}",
-                idUsuario,
-                observacion
-            );
-
-            if (transaction != null) await transaction.CommitAsync();
-        }
-        catch
-        {
-            if (transaction != null) await transaction.RollbackAsync();
-            throw;
-        }
-        finally
-        {
-            transaction?.Dispose();
-        }
+        // Auditoría
+        await _servicioAuditoria.RegistrarAccionAsync(
+            "AJUSTE_INVENTARIO",
+            $"PRODUCTO: {idProducto}",
+            $"Ajuste manual de inventario. Nueva existencia: {nuevaCantidad}. Obs: {observacion}",
+            idUsuario
+        );
     }
 
     public async Task<List<Producto>> ObtenerProductosConStockMinimoAsync()
     {
         return await _context.Productos
-        .Where(p => p.Existencias <= p.ExistenciasMinimas && p.Estado == "Activo")
-        .ToListAsync();
+            .Include(p => p.Marca)
+            .Include(p => p.Categoria)
+            .Where(p => p.Estado == "Activo" && p.Existencias <= p.ExistenciasMinimas)
+            .ToListAsync();
     }
 }

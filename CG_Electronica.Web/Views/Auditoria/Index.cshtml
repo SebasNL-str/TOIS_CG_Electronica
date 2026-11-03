@@ -1,41 +1,100 @@
 @model IEnumerable<CG_Electronica.Web.Models.Auditoria>
-
 @{
-    ViewData["Title"] = "Registro de Auditoría";
+    ViewData["Title"] = "Historial de Auditoría";
+    var filtro = ViewBag.Filtro as CG_Electronica.Web.Models.ViewModels.AuditoriaFiltroViewModel ?? new CG_Electronica.Web.Models.ViewModels.AuditoriaFiltroViewModel();
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Auditoría del Sistema</h1>
+    <h1 class="mt-4">Historial de Auditoría</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
         <li class="breadcrumb-item active">Auditoría</li>
     </ol>
 
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-shield-alt me-1"></i> Últimos 100 Eventos Registrados en el Sistema
+    <!-- Formulario de Filtros -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <i class="fas fa-filter me-1">}</i> Filtros de Búsqueda
+        </div>
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Acción</label>
+                    <select name="Accion" class="form-select" asp-items="filtro.AccionesList">
+                        <option value="">-- Todas las acciones --</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Módulo</label>
+                    <select name="Modulo" class="form-select" asp-items="filtro.ModulosList">
+                        <option value="">-- Todos los módulos --</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Usuario Responsable</label>
+                    <select name="IdUsuario" class="form-select" asp-items="filtro.UsuariosList">
+                        <option value="">-- Todos los usuarios --</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Búsqueda por Texto</label>
+                    <input type="text" name="BusquedaTexto" value="@filtro.BusquedaTexto" class="form-control" placeholder="Acción, registro u observación..." />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Fecha Inicial</label>
+                    <input type="date" name="FechaInicio" value="@filtro.FechaInicio?.ToString("yyyy-MM-dd")" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Fecha Final</label>
+                    <input type="date" name="FechaFin" value="@filtro.FechaFin?.ToString("yyyy-MM-dd")" class="form-control" />
+                </div>
+                <div class="col-md-6 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search me-1"></i> Filtrar</button>
+                    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-undo me-1"></i> Limpiar Filtros</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de Resultados -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <i class="fas fa-history me-1"></i> Registros de Auditoría Encontrados (@Model.Count())
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered table-striped align-middle">
                     <thead class="table-dark">
                         <tr>
-                            <th>Fecha y Hora</th>
+                            <th>ID</th>
                             <th>Acción</th>
                             <th>Registro Afectado</th>
                             <th>Usuario Responsable</th>
+                            <th>Fecha y Hora</th>
                             <th>Observación</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model)
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.IdAuditoria</td>
+                                    <td><span class="badge bg-info text-dark">@item.Accion</span></td>
+                                    <td><code>@item.RegistroAfectado</code></td>
+                                    <td>@(item.Usuario?.NombreUsuario ?? "Sistema")</td>
+                                    <td>@item.FechaHora.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                    <td>@item.Observacion</td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td>@item.FechaHora.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                                <td><span class="badge bg-secondary">@item.Accion</span></td>
-                                <td><code>@item.RegistroAfectado</code></td>
-                                <td>@item.Usuario?.NombreUsuario</td>
-                                <td>@item.Observacion</td>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    No se encontraron registros de auditoría con los filtros seleccionados.
+                                </td>
                             </tr>
                         }
                     </tbody>
