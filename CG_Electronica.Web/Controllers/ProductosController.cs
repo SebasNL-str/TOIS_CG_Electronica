@@ -1,4 +1,3 @@
-
 using CG_Electronica.Web.Data;
 using CG_Electronica.Web.Models;
 using CG_Electronica.Web.Services;
@@ -74,7 +73,6 @@ public class ProductosController : Controller
     }
 
     // GET: Productos/Edit/5
-    // GET: Productos/Edit/5
     [HttpGet]
     [Authorize(Policy = "Permiso:ProductosEditar")]
     public async Task<IActionResult> Edit(int? id)
@@ -91,7 +89,6 @@ public class ProductosController : Controller
         return View(producto);
     }
 
-    // POST: Productos/Edit/5
     // POST: Productos/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -115,9 +112,8 @@ public class ProductosController : Controller
 
                 if (productoDb == null) return NotFound();
 
-                // Preservar existencias y precio de compra actuales.
+                // Preservar exclusivamente las existencias actuales (el nuevo PrecioCompra del formulario se conserva).
                 producto.Existencias = productoDb.Existencias;
-                producto.PrecioCompra = productoDb.PrecioCompra;
 
                 _context.Update(producto);
                 await _context.SaveChangesAsync();
