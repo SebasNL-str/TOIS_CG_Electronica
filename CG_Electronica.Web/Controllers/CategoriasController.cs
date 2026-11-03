@@ -1,9 +1,11 @@
 ﻿using CG_Electronica.Web.Data;
 using CG_Electronica.Web.Models;
 using CG_Electronica.Web.Models.ViewModels;
+using CG_Electronica.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CG_Electronica.Web.Controllers;
 
@@ -11,8 +13,13 @@ namespace CG_Electronica.Web.Controllers;
 public class CategoriasController : Controller
 {
     private readonly AppDbContext _context;
+    private readonly IServicioAuditoria _servicioAuditoria;
 
-    public CategoriasController(AppDbContext context) => _context = context;
+    public CategoriasController(AppDbContext context, IServicioAuditoria servicioAuditoria)
+    {
+        _context = context;
+        _servicioAuditoria = servicioAuditoria;
+    }
 
     public async Task<IActionResult> Index()
         => View(await _context.Categorias.OrderBy(c => c.NombreCategoria).ToListAsync());
@@ -30,13 +37,18 @@ public class CategoriasController : Controller
 
         if (!ModelState.IsValid) return View(model);
 
-        _context.Categorias.Add(new Categoria
+        var nuevaCategoria = new Categoria
         {
             NombreCategoria = model.NombreCategoria,
             Estado = "Activo" // <--- Asignamos el estado inicial requerido por la BD
-        });
+        };
 
+        _context.Categorias.Add(nuevaCategoria);
         await _context.SaveChangesAsync();
+
+        int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+        await _servicioAuditoria.RegistrarAccionAsync("CREAR_CATEGORIA", $"CATEGORIA: {nuevaCategoria.IdCategoria}", $"Se creó la categoría {nuevaCategoria.NombreCategoria}.", idUsuario);
+
         TempData["Ok"] = "Categoría creada correctamente.";
         return RedirectToAction(nameof(Index));
     }
@@ -88,6 +100,9 @@ public class CategoriasController : Controller
                 _context.Update(categoriaDb);
                 await _context.SaveChangesAsync();
 
+                int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+                await _servicioAuditoria.RegistrarAccionAsync("EDITAR_CATEGORIA", $"CATEGORIA: {categoriaDb.IdCategoria}", $"Se actualizó la categoría {categoriaDb.NombreCategoria} (Estado: {categoriaDb.Estado}).", idUsuario);
+
                 TempData["Ok"] = "Categoría actualizada correctamente.";
                 return RedirectToAction(nameof(Index));
             }
@@ -117,6 +132,9 @@ public class CategoriasController : Controller
 
             _context.Update(categoria);
             await _context.SaveChangesAsync();
+
+            int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+            await _servicioAuditoria.RegistrarAccionAsync("INACTIVAR_CATEGORIA", $"CATEGORIA: {categoria.IdCategoria}", $"Se inactivó la categoría {categoria.NombreCategoria}.", idUsuario);
 
             TempData["Ok"] = "Categoría inactivada correctamente.";
         }

@@ -1,9 +1,11 @@
 ﻿using CG_Electronica.Web.Data;
 using CG_Electronica.Web.Models;
 using CG_Electronica.Web.Models.ViewModels;
+using CG_Electronica.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CG_Electronica.Web.Controllers;
 
@@ -11,8 +13,13 @@ namespace CG_Electronica.Web.Controllers;
 public class ClientesController : Controller
 {
     private readonly AppDbContext _context;
+    private readonly IServicioAuditoria _servicioAuditoria;
 
-    public ClientesController(AppDbContext context) => _context = context;
+    public ClientesController(AppDbContext context, IServicioAuditoria servicioAuditoria)
+    {
+        _context = context;
+        _servicioAuditoria = servicioAuditoria;
+    }
 
     [Authorize(Policy = "Permiso:Clientes.Ver")]
     public async Task<IActionResult> Index()
@@ -45,13 +52,19 @@ public class ClientesController : Controller
 
         if (!ModelState.IsValid) return View(model);
 
-        _context.Clientes.Add(new Cliente
+        var nuevoCliente = new Cliente
         {
             NombreCliente = model.NombreCliente,
             Telefono = model.Telefono,
             Cedula = model.Cedula
-        });
+        };
+
+        _context.Clientes.Add(nuevoCliente);
         await _context.SaveChangesAsync();
+
+        int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+        await _servicioAuditoria.RegistrarAccionAsync("CREAR_CLIENTE", $"CLIENTE: {nuevoCliente.IdCliente}", $"Se creó el cliente {nuevoCliente.NombreCliente} (Cédula: {nuevoCliente.Cedula}).", idUsuario);
+
         TempData["Ok"] = "Cliente creado correctamente.";
         return RedirectToAction(nameof(Index));
     }
@@ -108,6 +121,9 @@ public class ClientesController : Controller
                 _context.Update(clienteDb);
                 await _context.SaveChangesAsync();
 
+                int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+                await _servicioAuditoria.RegistrarAccionAsync("EDITAR_CLIENTE", $"CLIENTE: {clienteDb.IdCliente}", $"Se actualizó el cliente {clienteDb.NombreCliente} (Estado: {clienteDb.Estado}).", idUsuario);
+
                 TempData["Ok"] = "Cliente actualizado correctamente.";
                 return RedirectToAction(nameof(Index));
             }
@@ -124,7 +140,7 @@ public class ClientesController : Controller
     }
 
     // POST: Delete(BORRADO LÓGICO / INACTIVACIÓN)
-[HttpPost, ActionName("Delete")]
+    [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     [Authorize(Policy = "Permiso:Clientes.Editar")]
     public async Task<IActionResult> DeleteConfirmed(int id)
@@ -137,6 +153,9 @@ public class ClientesController : Controller
 
             _context.Update(cliente);
             await _context.SaveChangesAsync();
+
+            int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+            await _servicioAuditoria.RegistrarAccionAsync("INACTIVAR_CLIENTE", $"CLIENTE: {cliente.IdCliente}", $"Se inactivó al cliente {cliente.NombreCliente}.", idUsuario);
 
             TempData["Ok"] = "Cliente inactivado correctamente.";
         }

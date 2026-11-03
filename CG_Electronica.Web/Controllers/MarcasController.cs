@@ -1,9 +1,11 @@
 ﻿using CG_Electronica.Web.Data;
 using CG_Electronica.Web.Models;
 using CG_Electronica.Web.Models.ViewModels;
+using CG_Electronica.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace CG_Electronica.Web.Controllers;
 
@@ -11,8 +13,13 @@ namespace CG_Electronica.Web.Controllers;
 public class MarcasController : Controller
 {
     private readonly AppDbContext _context;
+    private readonly IServicioAuditoria _servicioAuditoria;
 
-    public MarcasController(AppDbContext context) => _context = context;
+    public MarcasController(AppDbContext context, IServicioAuditoria servicioAuditoria)
+    {
+        _context = context;
+        _servicioAuditoria = servicioAuditoria;
+    }
 
     public async Task<IActionResult> Index()
         => View(await _context.Marcas.OrderBy(m => m.NombreMarca).ToListAsync());
@@ -30,8 +37,13 @@ public class MarcasController : Controller
 
         if (!ModelState.IsValid) return View(model);
 
-        _context.Marcas.Add(new Marca { NombreMarca = model.NombreMarca, Estado = model.Estado });
+        var nuevaMarca = new Marca { NombreMarca = model.NombreMarca, Estado = model.Estado };
+        _context.Marcas.Add(nuevaMarca);
         await _context.SaveChangesAsync();
+
+        int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+        await _servicioAuditoria.RegistrarAccionAsync("CREAR_MARCA", $"MARCA: {nuevaMarca.IdMarca}", $"Se creó la marca {nuevaMarca.NombreMarca}.", idUsuario);
+
         TempData["Ok"] = "Marca creada correctamente.";
         return RedirectToAction(nameof(Index));
     }
@@ -65,6 +77,10 @@ public class MarcasController : Controller
         marca.NombreMarca = model.NombreMarca;
         marca.Estado = model.Estado;
         await _context.SaveChangesAsync();
+
+        int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+        await _servicioAuditoria.RegistrarAccionAsync("EDITAR_MARCA", $"MARCA: {marca.IdMarca}", $"Se actualizó la marca {marca.NombreMarca} (Estado: {marca.Estado}).", idUsuario);
+
         TempData["Ok"] = "Marca actualizada correctamente.";
         return RedirectToAction(nameof(Index));
     }
@@ -95,8 +111,13 @@ public class MarcasController : Controller
         var marca = await _context.Marcas.FindAsync(id);
         if (marca != null)
         {
+            string nombreMarcaEliminada = marca.NombreMarca;
             _context.Marcas.Remove(marca);
             await _context.SaveChangesAsync();
+
+            int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+            await _servicioAuditoria.RegistrarAccionAsync("ELIMINAR_MARCA", $"MARCA: {id}", $"Se eliminó la marca {nombreMarcaEliminada}.", idUsuario);
+
             TempData["Ok"] = "Marca eliminada correctamente.";
         }
         return RedirectToAction(nameof(Index));
