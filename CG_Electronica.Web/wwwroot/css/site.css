@@ -1,33 +1,50 @@
+/* =================================================================
+   SISTEMA DE DISEÑO GLOBAL "DARK BLUE" (REFINAMIENTO FINAL)
+   CG_ELECTRONICA.WEB - WCAG 2.2 AA & BOOTSTRAP 5 ADAPTATION
+   ================================================================ */
+
 :root {
-    /* Paleta de Colores Corporativa (Azules y Neutrales) */
-    --primary-dark: #0f172a;
-    --primary-main: #1e3a8a;
-    --primary-light: #3b82f6;
-    --primary-accent: #60a5fa;
-    --primary-subtle: #eff6ff;
+    /* Paleta Dark Blue de Alta Definición y Contraste */
+    --db-bg-main: #081525;         /* Fondo general de la aplicación (Azul marino profundo) */
+    --db-surface: #0B1F36;         /* Superficie base para contenedores y cards */
+    --db-surface-alt: #102B49;     /* Superficie elevada (hover, modales, dropdowns, filas alternas) */
+    --db-surface-border: #163B5C;  /* Bordes y separadores discretos */
 
-    --neutral-bg: #f8fafc;
-    --neutral-surface: #ffffff;
-    --neutral-border: #e2e8f0;
-    --neutral-text: #334155;
-    --neutral-muted: #64748b;
+    --db-text-main: #F8FAFC;       /* Texto principal (Blanco suavizado) */
+    --db-text-muted: #CBD5E1;      /* Texto secundario (Gris azulado claro) */
+    --db-accent: #38BDF8;          /* Celeste interactivo / Enlaces */
+    --db-accent-hover: #7DD3FC;    /* Celeste brillante para estados hover */
 
-    /* Semántica Funcional (Discreta) */
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --danger-color: #ef4444;
-    --info-color: #0ea5e9;
+    /* Sistema de Botones y Estados Semánticos Consistentes */
+    --btn-primary-bg: #2563EB;     /* Azul principal de acción */
+    --btn-primary-hover: #1D4ED8;
+    --btn-edit-bg: #0EA5E9;        /* Celeste para edición */
+    --btn-edit-hover: #0284C7;
+    --btn-danger-bg: #DC2626;      /* Rojo semántico para eliminación */
+    --btn-danger-hover: #B91C1C;
+    --btn-neutral-bg: #334155;     /* Neutral oscuro para cancelar/regresar */
+    --btn-neutral-hover: #475569;
 
-    /* Tipografía y Espaciamiento */
+    /* Semántica Funcional en Entorno Oscuro */
+    --success-bg: rgba(16, 185, 129, 0.15);
+    --success-text: #34D399;
+    --warning-bg: rgba(245, 158, 11, 0.15);
+    --warning-text: #FBBF24;
+    --danger-bg: rgba(239, 68, 68, 0.15);
+    --danger-text: #F87171;
+    --info-bg: rgba(14, 165, 233, 0.15);
+    --info-text: #38BDF8;
+
+    /* Tipografía, Bordes y Sombras */
     --font-family-base: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --border-radius-sm: 0.25rem;
     --border-radius: 0.375rem;
     --border-radius-lg: 0.5rem;
     --border-radius-pill: 50rem;
 
-    --box-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --box-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --box-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3);
+    --box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+    --box-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
 
     --transition-base: all 0.2s ease-in-out;
 }
@@ -43,8 +60,8 @@ html {
 
 body {
     font-family: var(--font-family-base);
-    background-color: var(--neutral-bg);
-    color: var(--neutral-text);
+    background-color: var(--db-bg-main);
+    color: var(--db-text-main);
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -64,10 +81,9 @@ main.pb-3 {
     padding-bottom: 2.5rem !important;
 }
 
-/* Encabezados y Títulos de Páginas */
 h1, h2, h3, h4, h5, h6, 
 .h1, .h2, .h3, .h4, .h5, .h6 {
-    color: var(--primary-dark);
+    color: var(--db-text-main);
     font-weight: 700;
 }
 
@@ -75,9 +91,17 @@ h1.mt-4, .container-fluid > h1:first-of-type {
     font-size: 1.75rem;
     letter-spacing: -0.025em;
     margin-bottom: 0.5rem;
+    color: var(--db-text-main);
 }
 
-/* Breadcrumbs y Subtítulos */
+p, span, label, li {
+    color: var(--db-text-muted);
+}
+
+.text-muted {
+    color: var(--db-text-muted) !important;
+}
+
 .breadcrumb {
     background-color: transparent;
     padding: 0;
@@ -86,41 +110,43 @@ h1.mt-4, .container-fluid > h1:first-of-type {
 }
 
 .breadcrumb-item a {
-    color: var(--primary-light);
+    color: var(--db-accent);
     text-decoration: none;
+    font-weight: 500;
     transition: var(--transition-base);
 }
 
 .breadcrumb-item a:hover {
-    color: var(--primary-main);
+    color: var(--db-accent-hover);
     text-decoration: underline;
 }
 
 .breadcrumb-item.active {
-    color: var(--neutral-muted);
+    color: var(--db-text-muted);
 }
 
 
 /* =================================================================
-   B. NAVEGACIÓN (NAVBAR)
+   B. NAVEGACIÓN (NAVBAR) - DARK BLUE PROFUNDO
    ================================================================ */
 
 .navbar, header nav.navbar {
-    background-color: var(--primary-dark) !important;
+    background-color: var(--db-bg-main) !important;
+    border-bottom: 1px solid var(--db-surface-border);
     box-shadow: var(--box-shadow);
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
 }
 
 .navbar-brand {
-    color: #ffffff !important;
+    color: var(--db-text-main) !important;
     font-weight: 700;
     font-size: 1.25rem;
     letter-spacing: -0.025em;
 }
 
 .navbar-nav .nav-link {
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: var(--db-text-muted) !important;
     font-weight: 500;
     padding: 0.5rem 0.75rem !important;
     border-radius: var(--border-radius);
@@ -129,19 +155,19 @@ h1.mt-4, .container-fluid > h1:first-of-type {
 
 .navbar-nav .nav-link:hover, 
 .navbar-nav .nav-link:focus {
-    color: #ffffff !important;
-    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--db-text-main) !important;
+    background-color: var(--db-surface-alt);
 }
 
 .navbar-nav .nav-link.active {
     color: #ffffff !important;
-    background-color: var(--primary-main);
+    background-color: var(--btn-primary-bg);
+    font-weight: 600;
 }
 
-/* Dropdowns en Navbar */
 .dropdown-menu {
-    background-color: var(--neutral-surface);
-    border: 1px solid var(--neutral-border);
+    background-color: var(--db-surface-alt);
+    border: 1px solid var(--db-surface-border);
     border-radius: var(--border-radius-lg);
     box-shadow: var(--box-shadow-lg);
     padding: 0.5rem;
@@ -149,7 +175,7 @@ h1.mt-4, .container-fluid > h1:first-of-type {
 }
 
 .dropdown-item {
-    color: var(--neutral-text);
+    color: var(--db-text-muted);
     border-radius: var(--border-radius);
     padding: 0.5rem 1rem;
     font-weight: 500;
@@ -157,27 +183,27 @@ h1.mt-4, .container-fluid > h1:first-of-type {
 }
 
 .dropdown-item:hover, .dropdown-item:focus {
-    background-color: var(--primary-subtle);
-    color: var(--primary-main);
+    background-color: var(--db-surface);
+    color: var(--db-text-main);
 }
 
-/* Footer / Pie de página */
 footer.border-top {
-    background-color: var(--neutral-surface);
-    border-color: var(--neutral-border) !important;
-    color: var(--neutral-muted);
+    background-color: var(--db-surface);
+    border-color: var(--db-surface-border) !important;
+    color: var(--db-text-muted);
     font-size: 0.875rem;
     padding: 1.25rem 0;
     margin-top: auto;
+    font-weight: 500;
 }
 
 
 /* =================================================================
-   C. BOTONES E INTERACTIVIDAD
+   C. SISTEMA GLOBAL Y UNIFICADO DE BOTONES (DARK BLUE)
    ================================================================ */
 
 .btn {
-    font-weight: 500;
+    font-weight: 600;
     border-radius: var(--border-radius);
     padding: 0.5rem 1rem;
     font-size: 0.9375rem;
@@ -187,135 +213,150 @@ footer.border-top {
     justify-content: center;
     gap: 0.5rem;
     box-shadow: var(--box-shadow-sm);
+    border: 1px solid transparent;
+    cursor: pointer;
 }
 
 .btn:active {
     transform: translateY(1px);
 }
 
-.btn-primary {
-    background-color: var(--primary-main);
-    border-color: var(--primary-main);
-    color: #ffffff;
+.btn:focus, .btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.35);
 }
 
-.btn-primary:hover, .btn-primary:focus {
-    background-color: #1d4ed8;
-    border-color: #1d4ed8;
-    color: #ffffff;
+/* 1. Botones Principales (Crear, Registrar, Guardar, Confirmar) */
+.btn-primary, 
+.btn-success {
+    background-color: var(--btn-primary-bg) !important;
+    border-color: var(--btn-primary-bg) !important;
+    color: #ffffff !important;
+}
+
+.btn-primary:hover, .btn-primary:focus,
+.btn-success:hover, .btn-success:focus {
+    background-color: var(--btn-primary-hover) !important;
+    border-color: var(--btn-primary-hover) !important;
+    color: #ffffff !important;
     box-shadow: var(--box-shadow);
 }
 
-.btn-secondary {
-    background-color: var(--neutral-muted);
-    border-color: var(--neutral-muted);
-    color: #ffffff;
+/* 2. Botones de Edición / Modificación */
+.btn-warning, 
+.btn-info, 
+.btn-outline-primary, 
+.btn-outline-info {
+    background-color: var(--btn-edit-bg) !important;
+    border-color: var(--btn-edit-bg) !important;
+    color: #ffffff !important;
 }
 
-.btn-secondary:hover, .btn-secondary:focus {
-    background-color: #475569;
-    border-color: #475569;
-    color: #ffffff;
+.btn-warning:hover, .btn-warning:focus,
+.btn-info:hover, .btn-info:focus,
+.btn-outline-primary:hover, .btn-outline-primary:focus,
+.btn-outline-info:hover, .btn-outline-info:focus {
+    background-color: var(--btn-edit-hover) !important;
+    border-color: var(--btn-edit-hover) !important;
+    color: #ffffff !important;
+    box-shadow: var(--box-shadow);
 }
 
-.btn-outline-primary {
-    color: var(--primary-main);
-    border-color: var(--primary-main);
-    background-color: transparent;
+/* 3. Botones de Eliminación / Borrado */
+.btn-danger, 
+.btn-outline-danger {
+    background-color: var(--btn-danger-bg) !important;
+    border-color: var(--btn-danger-bg) !important;
+    color: #ffffff !important;
 }
 
-.btn-outline-primary:hover, .btn-outline-primary:focus {
-    background-color: var(--primary-main);
-    border-color: var(--primary-main);
-    color: #ffffff;
+.btn-danger:hover, .btn-danger:focus,
+.btn-outline-danger:hover, .btn-outline-danger:focus {
+    background-color: var(--btn-danger-hover) !important;
+    border-color: var(--btn-danger-hover) !important;
+    color: #ffffff !important;
+    box-shadow: var(--box-shadow);
 }
 
+/* 4. Botones Neutrales / Cancelar / Regresar */
+.btn-secondary, 
 .btn-outline-secondary {
-    color: var(--neutral-muted);
-    border-color: var(--neutral-border);
-    background-color: var(--neutral-surface);
+    background-color: var(--btn-neutral-bg) !important;
+    border-color: var(--btn-neutral-bg) !important;
+    color: #ffffff !important;
 }
 
+.btn-secondary:hover, .btn-secondary:focus,
 .btn-outline-secondary:hover, .btn-outline-secondary:focus {
-    background-color: var(--neutral-bg);
-    color: var(--primary-dark);
-    border-color: var(--neutral-muted);
-}
-
-.btn-success {
-    background-color: var(--success-color);
-    border-color: var(--success-color);
-}
-
-.btn-warning {
-    background-color: var(--warning-color);
-    border-color: var(--warning-color);
-    color: #ffffff;
-}
-
-.btn-danger {
-    background-color: var(--danger-color);
-    border-color: var(--danger-color);
+    background-color: var(--btn-neutral-hover) !important;
+    border-color: var(--btn-neutral-hover) !important;
+    color: #ffffff !important;
+    box-shadow: var(--box-shadow);
 }
 
 .btn-sm {
-    padding: 0.25rem 0.5rem;
+    padding: 0.3rem 0.625rem;
     font-size: 0.8125rem;
     border-radius: var(--border-radius-sm);
+    gap: 0.35rem;
+}
+
+.btn:disabled, .btn.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+    box-shadow: none;
 }
 
 
 /* =================================================================
-   D. FORMULARIOS Y ENTRADAS DE DATOS
+   D. FORMULARIOS Y ENTRADAS DE DATOS (SUPERFICIES OSCURAS)
    ================================================================ */
 
 .form-label, label {
     font-weight: 600;
-    color: var(--primary-dark);
+    color: var(--db-text-main);
     font-size: 0.875rem;
     margin-bottom: 0.375rem;
 }
 
 .form-control, .form-select {
-    background-color: var(--neutral-surface);
-    border: 1px solid var(--neutral-border);
+    background-color: var(--db-surface-alt) !important;
+    border: 1px solid var(--db-surface-border) !important;
     border-radius: var(--border-radius);
-    color: var(--neutral-text);
-    padding: 0.5rem 0.75rem;
+    color: var(--db-text-main) !important;
+    padding: 0.55rem 0.75rem;
     font-size: 0.9375rem;
+    font-weight: 500;
     transition: var(--transition-base);
     box-shadow: var(--box-shadow-sm);
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: var(--primary-light);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    border-color: var(--db-accent) !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
     outline: none;
+    color: var(--db-text-main) !important;
+    background-color: var(--db-surface-alt) !important;
 }
 
 .form-control::placeholder {
-    color: var(--neutral-muted);
-    opacity: 0.7;
+    color: #94A3B8 !important;
+    opacity: 1;
 }
 
 textarea.form-control {
     min-height: 100px;
 }
 
-/* Validaciones ASP.NET Core */
 .text-danger, .field-validation-error {
-    color: var(--danger-color) !important;
+    color: #F87171 !important;
     font-size: 0.8125rem;
-    font-weight: 500;
+    font-weight: 600;
     margin-top: 0.25rem;
 }
 
 input.input-validation-error, select.input-validation-error, textarea.input-validation-error {
-    border-color: var(--danger-color) !important;
-}
-
-input.input-validation-error:focus, select.input-validation-error:focus {
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+    border-color: #F87171 !important;
 }
 
 .validation-summary-errors ul {
@@ -325,70 +366,88 @@ input.input-validation-error:focus, select.input-validation-error:focus {
 }
 
 .form-check-input {
-    border-color: var(--neutral-border);
+    background-color: var(--db-surface-alt);
+    border-color: var(--db-surface-border);
     width: 1.125rem;
     height: 1.125rem;
     margin-top: 0.1875rem;
 }
 
 .form-check-input:checked {
-    background-color: var(--primary-main);
-    border-color: var(--primary-main);
+    background-color: var(--btn-primary-bg);
+    border-color: var(--btn-primary-bg);
 }
 
 .form-check-label {
-    font-weight: 400;
-    color: var(--neutral-text);
+    font-weight: 500;
+    color: var(--db-text-muted);
     margin-left: 0.25rem;
 }
 
 
 /* =================================================================
-   E. TABLAS ESTANDARIZADAS
+   E. TABLAS ESTANDARIZADAS Y REFINAMIENTO DE VARIABLES BOOTSTRAP
    ================================================================ */
 
 .table-responsive {
     border-radius: var(--border-radius-lg);
     box-shadow: var(--box-shadow-sm);
-    background-color: var(--neutral-surface);
-    border: 1px solid var(--neutral-border);
+    background-color: var(--db-surface);
+    border: 1px solid var(--db-surface-border);
     margin-bottom: 1.5rem;
 }
 
+/* Neutralización estricta de las variables nativas de Bootstrap 5 para tablas */
 .table {
+    --bs-table-bg: var(--db-surface);
+    --bs-table-color: var(--db-text-muted);
+    --bs-table-striped-bg: var(--db-surface-alt);
+    --bs-table-striped-color: var(--db-text-main);
+    --bs-table-hover-bg: #163B5C;
+    --bs-table-hover-color: var(--db-text-main);
+    --bs-table-border-color: var(--db-surface-border);
+    --bs-table-accent-bg: transparent;
+    
     margin-bottom: 0;
-    color: var(--neutral-text);
+    color: var(--db-text-muted);
     vertical-align: middle;
-    border-color: var(--neutral-border);
+    border-color: var(--db-surface-border);
+    background-color: var(--db-surface);
 }
 
 .table > thead {
-    background-color: #f1f5f9;
+    background-color: var(--db-surface-alt);
+    --bs-table-bg: var(--db-surface-alt);
+    --bs-table-color: var(--db-text-main);
 }
 
 .table > thead > tr > th {
-    color: var(--primary-dark);
-    font-weight: 600;
+    color: var(--db-text-main) !important;
+    font-weight: 700;
     font-size: 0.8125rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 2px solid var(--neutral-border);
+    border-bottom: 2px solid var(--db-surface-border);
     padding: 0.875rem 1rem;
     white-space: nowrap;
+    background-color: var(--db-surface-alt) !important;
 }
 
 .table > tbody > tr > td {
     padding: 0.875rem 1rem;
-    border-bottom: 1px solid var(--neutral-border);
+    border-bottom: 1px solid var(--db-surface-border);
     font-size: 0.9375rem;
+    color: var(--db-text-muted);
 }
 
 .table-striped > tbody > tr:nth-of-type(odd) > * {
-    background-color: rgba(248, 250, 252, 0.6);
+    background-color: var(--db-surface-alt) !important;
+    color: var(--db-text-main) !important;
 }
 
 .table-hover > tbody > tr:hover > * {
-    background-color: var(--primary-subtle);
+    background-color: #163B5C !important;
+    color: var(--db-text-main) !important;
 }
 
 .table tbody tr:last-child td {
@@ -401,13 +460,14 @@ input.input-validation-error:focus, select.input-validation-error:focus {
    ================================================================ */
 
 .card {
-    background-color: var(--neutral-surface);
-    border: 1px solid var(--neutral-border);
+    background-color: var(--db-surface) !important;
+    border: 1px solid var(--db-surface-border) !important;
     border-radius: var(--border-radius-lg);
     box-shadow: var(--box-shadow-sm);
     transition: var(--transition-base);
     margin-bottom: 1.5rem;
     overflow: hidden;
+    color: var(--db-text-main);
 }
 
 .card:hover {
@@ -415,28 +475,29 @@ input.input-validation-error:focus, select.input-validation-error:focus {
 }
 
 .card-header {
-    background-color: var(--neutral-surface);
-    border-bottom: 1px solid var(--neutral-border);
-    font-weight: 600;
-    color: var(--primary-dark);
+    background-color: var(--db-surface-alt) !important;
+    border-bottom: 1px solid var(--db-surface-border) !important;
+    font-weight: 700;
+    color: var(--db-text-main) !important;
     padding: 1rem 1.25rem;
 }
 
 .card-header.bg-dark {
-    background-color: var(--primary-dark) !important;
-    color: #ffffff !important;
+    background-color: var(--db-bg-main) !important;
+    color: var(--db-text-main) !important;
 }
 
 .card-header.bg-secondary {
-    background-color: var(--neutral-muted) !important;
-    color: #ffffff !important;
+    background-color: var(--db-surface-alt) !important;
+    color: var(--db-text-main) !important;
 }
 
 .card-body {
     padding: 1.25rem;
+    background-color: var(--db-surface);
+    color: var(--db-text-muted);
 }
 
-/* Stat Cards (Indicadores de Dashboard) */
 .card.border-start {
     border-left-width: 4px !important;
 }
@@ -444,11 +505,12 @@ input.input-validation-error:focus, select.input-validation-error:focus {
 .card .text-xs {
     font-size: 0.75rem;
     letter-spacing: 0.05em;
+    font-weight: 600;
 }
 
 
 /* =================================================================
-   G. ELEMENTOS ADICIONALES (ALERTAS, BADGES, MODALES)
+   G. ELEMENTOS ADICIONALES (ALERTAS, BADGES, MODALES, PAGINACIÓN)
    ================================================================ */
 
 .alert {
@@ -457,69 +519,91 @@ input.input-validation-error:focus, select.input-validation-error:focus {
     box-shadow: var(--box-shadow-sm);
     padding: 1rem 1.25rem;
     font-size: 0.9375rem;
+    font-weight: 500;
 }
 
 .alert-success {
-    background-color: #d1fae5;
-    color: #065f46;
+    background-color: var(--success-bg) !important;
+    color: var(--success-text) !important;
+    border-left: 4px solid var(--success-text);
 }
 
 .alert-danger {
-    background-color: #fee2e2;
-    color: #991b1b;
+    background-color: var(--danger-bg) !important;
+    color: var(--danger-text) !important;
+    border-left: 4px solid var(--danger-text);
 }
 
 .alert-warning {
-    background-color: #fef3c7;
-    color: #92400e;
+    background-color: var(--warning-bg) !important;
+    color: var(--warning-text) !important;
+    border-left: 4px solid var(--warning-text);
 }
 
 .alert-info {
-    background-color: #e0f2fe;
-    color: #0369a1;
+    background-color: var(--info-bg) !important;
+    color: var(--info-text) !important;
+    border-left: 4px solid var(--info-text);
 }
 
-/* Badges */
 .badge {
-    font-weight: 600;
-    padding: 0.35em 0.65em;
+    font-weight: 700;
+    padding: 0.4em 0.75em;
     font-size: 0.75rem;
     border-radius: var(--border-radius-pill);
 }
 
 .badge.bg-info {
-    background-color: var(--primary-subtle) !important;
-    color: var(--primary-main) !important;
-    border: 1px solid rgba(59, 130, 246, 0.2);
+    background-color: rgba(56, 189, 248, 0.15) !important;
+    color: var(--db-accent) !important;
+    border: 1px solid rgba(56, 189, 248, 0.3);
 }
 
-/* Modales */
 .modal-content {
+    background-color: var(--db-surface) !important;
     border-radius: var(--border-radius-lg);
-    border: 1px solid var(--neutral-border);
+    border: 1px solid var(--db-surface-border) !important;
     box-shadow: var(--box-shadow-lg);
+    color: var(--db-text-main);
 }
 
 .modal-header {
-    border-bottom: 1px solid var(--neutral-border);
-    background-color: var(--neutral-bg);
+    border-bottom: 1px solid var(--db-surface-border);
+    background-color: var(--db-surface-alt);
     border-top-left-radius: var(--border-radius-lg);
     border-top-right-radius: var(--border-radius-lg);
+    color: var(--db-text-main);
 }
 
 .modal-footer {
-    border-top: 1px solid var(--neutral-border);
-    background-color: var(--neutral-bg);
+    border-top: 1px solid var(--db-surface-border);
+    background-color: var(--db-surface-alt);
     border-bottom-left-radius: var(--border-radius-lg);
     border-bottom-right-radius: var(--border-radius-lg);
 }
 
-/* Código en tablas y vistas */
+/* Paginación y elementos de navegación oscura */
+.pagination {
+    --bs-pagination-bg: var(--db-surface);
+    --bs-pagination-color: var(--db-text-main);
+    --bs-pagination-border-color: var(--db-surface-border);
+    --bs-pagination-hover-bg: var(--db-surface-alt);
+    --bs-pagination-hover-color: var(--db-accent);
+    --bs-pagination-hover-border-color: var(--db-surface-border);
+    --bs-pagination-active-bg: var(--btn-primary-bg);
+    --bs-pagination-active-color: #ffffff;
+    --bs-pagination-active-border-color: var(--btn-primary-bg);
+    --bs-pagination-disabled-bg: var(--db-bg-main);
+    --bs-pagination-disabled-color: var(--db-text-muted);
+    --bs-pagination-disabled-border-color: var(--db-surface-border);
+}
+
 code {
-    background-color: #f1f5f9;
-    color: var(--primary-main);
-    padding: 0.125rem 0.25rem;
+    background-color: var(--db-surface-alt);
+    color: var(--db-accent);
+    padding: 0.15rem 0.3rem;
     border-radius: var(--border-radius-sm);
     font-size: 0.875rem;
+    font-weight: 600;
     font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
