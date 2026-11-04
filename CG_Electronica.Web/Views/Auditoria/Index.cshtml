@@ -17,16 +17,16 @@
             <i class="fas fa-filter me-1"></i> Filtros de Búsqueda
         </div>
         <div class="card-body">
-            <form method="get" asp-action="Index" class="row g-3">
+            <form id="formFiltros" method="get" asp-action="Index" class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label fw-bold">Acción</label>
-                    <select name="Accion" class="form-select" asp-items="filtro.AccionesList">
+                    <select id="FiltroAccion" name="Accion" class="form-select" asp-items="filtro.AccionesList">
                         <option value="">-- Todas las acciones --</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-bold">Módulo</label>
-                    <select name="Modulo" class="form-select" asp-items="filtro.ModulosList">
+                    <select id="FiltroModulo" name="Modulo" class="form-select" asp-items="filtro.ModulosList">
                         <option value="">-- Todos los módulos --</option>
                     </select>
                 </div>
@@ -103,3 +103,23 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const selectModulo = document.getElementById("FiltroModulo");
+            const selectAccion = document.getElementById("FiltroAccion");
+            const formFiltros = document.getElementById("formFiltros");
+
+            if (!selectModulo || !selectAccion || !formFiltros) return;
+
+            // Al cambiar el módulo, actualizamos de forma limpia las acciones permitidas consultando al servidor
+            selectModulo.addEventListener("change", function () {
+                // Limpiamos la acción seleccionada previamente ya que cambiará de contexto
+                selectAccion.value = "";
+                // Enviamos el formulario por GET para que el servidor devuelva el conjunto exacto de acciones del módulo
+                formFiltros.submit();
+            });
+        });
+    </script>
+}
