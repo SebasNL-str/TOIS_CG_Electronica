@@ -1,25 +1,106 @@
-﻿@model ErrorViewModel
+@model CG_Electronica.Web.Models.ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = "Error Inesperado";
+    Layout = "_Layout"; // Respeta el layout administrativo general
+
+    // Constante configurable para el correo del equipo de desarrollo
+    const string EmailDesarrollo = "yatoortiz05@gmail.com";
+
+    // Preparación del asunto y cuerpo estructurado para el enlace mailto
+    string asuntoEmail = Uri.EscapeDataString("Reporte de error - CG Electronica");
+    string cuerpoEmail = Uri.EscapeDataString(
+        "Hola, equipo de desarrollo:\n\n" +
+        "Se ha presentado un inconveniente en el sistema y necesito reportarlo.\n\n" +
+        "--- DETALLES TÉCNICOS ---\n" +
+        $"RequestId: {(Model?.ShowRequestId == true ? Model.RequestId : "No disponible")}\n" +
+        $"Fecha y Hora: {DateTime.Now:yyyy-MM-dd HH:mm:ss}\n\n" +
+        "--- DESCRIPCIÓN DEL PROBLEMA ---\n" +
+        "Por favor, describe brevemente qué estabas haciendo cuando ocurrió el error:\n[Escribe aquí tus comentarios]\n"
+    );
+
+    string mailtoUrl = $"mailto:{EmailDesarrollo}?subject={asuntoEmail}&body={cuerpoEmail}";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <!-- Tarjeta Principal de Error -->
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <!-- Cabecera Visual con tono de alerta controlado -->
+                <div class="card-header bg-danger bg-gradient text-white text-center py-4">
+                    <div class="mb-2">
+                        <i class="fas fa-exclamation-triangle fa-3x opacity-85"></i>
+                    </div>
+                    <h2 class="h3 fw-bold mb-0">¡Ups! Algo salió mal.</h2>
+                </div>
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
+                <div class="card-body p-4 p-md-5">
+                    <!-- Mensaje Orientado al Usuario Final -->
+                    <div class="text-center mb-4">
+                        <p class="text-secondary fs-6 lead">
+                            Se produjo un inconveniente al procesar tu solicitud. No te preocupes, puedes regresar al inicio o comunicar el incidente a nuestro equipo de desarrollo para que podamos revisarlo.
+                        </p>
+                    </div>
 
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
+                    <!-- Botones de Acción Principal -->
+                    <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-primary px-4 py-2 shadow-sm">
+                            <i class="fas fa-home me-2"></i> Regresar al Inicio
+                        </a>
+                        <button type="button" class="btn btn-outline-secondary px-4 py-2 shadow-sm" onclick="history.back();">
+                            <i class="fas fa-arrow-left me-2"></i> Página Anterior
+                        </button>
+                    </div>
+
+                    <hr class="my-4 text-muted opacity-25">
+
+                    <!-- Sección de Contacto por Gmail / Correo -->
+                    <div class="bg-light p-4 rounded-3 mb-4 border border-1 border-light-subtle">
+                        <div class="d-flex align-items-start">
+                            <div class="text-primary me-3 fs-4">
+                                <i class="fas fa-envelope-open-text"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold text-dark fs-6 mb-1">¿Necesitas informar este problema?</h5>
+                                <p class="text-muted small mb-3">
+                                    Puedes comunicarte con nuestro equipo de desarrollo mediante correo electrónico adjuntando los detalles del incidente.
+                                </p>
+                                <a href="@mailtoUrl" class="btn btn-dark btn-sm px-3 py-2 shadow-sm">
+                                    <i class="fas fa-paper-plane me-1"></i> Contactar al equipo de desarrollo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección Técnica Discreta para el Equipo de Desarrollo -->
+                    <div class="accordion" id="accordionTecnico">
+                        <div class="accordion-item border-0 bg-light">
+                            <h2 class="accordion-header" id="headingTecnico">
+                                <button class="accordion-button collapsed bg-transparent text-muted small fw-semibold shadow-none py-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTecnico" aria-expanded="false" aria-controls="collapseTecnico">
+                                    <i class="fas fa-code me-2"></i> Información técnica para el equipo de desarrollo
+                                </button>
+                            </h2>
+                            <div id="collapseTecnico" class="accordion-collapse collapse" aria-labelledby="headingTecnico" data-bs-parent="#accordionTecnico">
+                                <div class="accordion-body small text-secondary pt-1 pb-3">
+                                    <p class="mb-2">Por favor, informa al grupo de desarrollo sobre el siguiente incidente para facilitar su identificación y solución:</p>
+                                    <ul class="list-unstyled mb-0 bg-white p-3 rounded border font-monospace">
+                                        <li class="mb-1">
+                                            <strong class="text-dark">RequestId:</strong> 
+                                            <span class="text-danger">@(Model?.ShowRequestId == true ? Model.RequestId : "No disponible (ID de traza no generado)")</span>
+                                        </li>
+                                        <li>
+                                            <strong class="text-dark">Fecha y Hora:</strong> 
+                                            <span>@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- Fin de Tarjeta -->
+        </div>
+    </div>
+</div>
