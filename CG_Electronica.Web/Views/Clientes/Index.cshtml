@@ -49,8 +49,16 @@
                         @if (User.TienePermiso("Clientes.Editar"))
                         {
                             <td class="text-end">
-                                <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@item.IdCliente">Editar</a>
-                                <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.IdCliente">Eliminar</a>
+                                <!-- 2. Celda Acciones -->
+                                <a asp-action="Edit" asp-route-id="@item.IdCliente" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </a>
+                                @if (item.Estado == "Activo")
+                                {
+                                    <a asp-action="Delete" asp-route-id="@item.IdCliente" class="btn btn-sm btn-danger">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </a>
+                                }
                             </td>
                         }
                         <td>

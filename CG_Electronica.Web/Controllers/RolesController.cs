@@ -1,11 +1,9 @@
 ﻿using CG_Electronica.Web.Data;
 using CG_Electronica.Web.Models;
 using CG_Electronica.Web.Models.ViewModels;
-using CG_Electronica.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace CG_Electronica.Web.Controllers
 {
@@ -13,12 +11,10 @@ namespace CG_Electronica.Web.Controllers
     public class RolesController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly IServicioAuditoria _servicioAuditoria;
 
-        public RolesController(AppDbContext context, IServicioAuditoria servicioAuditoria)
+        public RolesController(AppDbContext context)
         {
             _context = context;
-            _servicioAuditoria = servicioAuditoria;
         }
 
         // 1. GET: Listado de Roles
@@ -83,10 +79,12 @@ namespace CG_Electronica.Web.Controllers
                 }
                 else
                 {
+                    // En POST Create, asignamos el estado:
                     var nuevoRol = new Rol
                     {
                         NombreRol = model.NombreRol,
-                        Descripcion = model.Descripcion
+                        Descripcion = model.Descripcion,
+                        Estado = model.Estado
                     };
 
                     _context.Roles.Add(nuevoRol);
@@ -104,10 +102,6 @@ namespace CG_Electronica.Web.Controllers
                     }
 
                     await _context.SaveChangesAsync();
-
-                    int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
-                    await _servicioAuditoria.RegistrarAccionAsync("CREAR_ROL", $"ROL: {nuevoRol.IdRol}", $"Se creó el rol {nuevoRol.NombreRol}.", idUsuario);
-
                     TempData["Ok"] = "Rol creado exitosamente.";
                     return RedirectToAction(nameof(Index));
                 }
@@ -128,11 +122,13 @@ namespace CG_Electronica.Web.Controllers
 
             if (rolDb == null) return NotFound();
 
+            // En GET Edit, mapeamos el estado:
             var model = new RolViewModel
             {
                 IdRol = rolDb.IdRol,
                 NombreRol = rolDb.NombreRol,
-                Descripcion = rolDb.Descripcion
+                Descripcion = rolDb.Descripcion,
+                Estado = rolDb.Estado
             };
 
             var permisosDb = await _context.Permisos.ToListAsync();
@@ -178,14 +174,16 @@ namespace CG_Electronica.Web.Controllers
                     if (rolDb == null) return NotFound();
 
                     // Evitamos que le cambien el nombre al rol "Administrador" (medida de seguridad)
-                    if (rolDb.NombreRol.ToLower() == "administrador" && model.NombreRol.ToLower() != "administrador")
+                    if (rolDb.NombreRol.ToLower() == "administrador" && model.Estado != "Activo")
                     {
-                        ModelState.AddModelError("NombreRol", "No se puede cambiar el nombre al rol principal de Administrador.");
+                        ModelState.AddModelError("Estado", "El rol de Administrador principal no puede ser inactivado.");
+                        // recargar permisos...
                         return View(model);
                     }
 
                     rolDb.NombreRol = model.NombreRol;
                     rolDb.Descripcion = model.Descripcion;
+                    rolDb.Estado = model.Estado;
 
                     // TRUCO PARA ACTUALIZAR RELACIÓN N:N -> Borramos todos los permisos viejos y agregamos los nuevos marcados
                     _context.RolPermisos.RemoveRange(rolDb.RolPermisos);
@@ -202,9 +200,6 @@ namespace CG_Electronica.Web.Controllers
 
                     _context.Update(rolDb);
                     await _context.SaveChangesAsync();
-
-                    int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
-                    await _servicioAuditoria.RegistrarAccionAsync("EDITAR_ROL", $"ROL: {rolDb.IdRol}", $"Se actualizó el rol {rolDb.NombreRol} y sus permisos asignados.", idUsuario);
 
                     TempData["Ok"] = "Rol actualizado exitosamente.";
                     return RedirectToAction(nameof(Index));
@@ -234,41 +229,27 @@ namespace CG_Electronica.Web.Controllers
             return View(rol);
         }
 
-        // 8. POST: Confirmar Eliminación de Rol
+        // En POST Delete (DeleteConfirmed), convertimos a borrado lógico:
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "Permiso:Roles.Editar")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var rol = await _context.Roles
-                .Include(r => r.RolPermisos)
-                .FirstOrDefaultAsync(r => r.IdRol == id);
-
+            var rol = await _context.Roles.FindAsync(id);
             if (rol != null)
             {
-                // Doble validación en POST
                 if (rol.NombreRol.ToLower() == "administrador")
                 {
-                    TempData["Error"] = "No se puede eliminar el rol de Administrador.";
+                    TempData["Error"] = "No se puede inactivar el rol de Administrador.";
                     return RedirectToAction(nameof(Index));
                 }
 
-                try
-                {
-                    string nombreRolEliminado = rol.NombreRol;
-                    _context.Roles.Remove(rol);
-                    await _context.SaveChangesAsync();
+                // BORRADO LÓGICO
+                rol.Estado = "Inactivo";
+                _context.Update(rol);
+                await _context.SaveChangesAsync();
 
-                    int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
-                    await _servicioAuditoria.RegistrarAccionAsync("ELIMINAR_ROL", $"ROL: {id}", $"Se eliminó el rol {nombreRolEliminado}.", idUsuario);
-
-                    TempData["Ok"] = "Rol eliminado exitosamente.";
-                }
-                catch (DbUpdateException)
-                {
-                    // Capturamos el error si hay usuarios que aún tienen este rol asignado (Restricción de FK en BD)
-                    TempData["Error"] = "No se puede eliminar este rol porque hay usuarios asignados a él. Debe cambiar el rol de dichos usuarios antes de borrarlo.";
-                }
+                TempData["Ok"] = "Rol inactivado correctamente.";
             }
 
             return RedirectToAction(nameof(Index));
