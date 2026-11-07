@@ -32,12 +32,13 @@
 
 <div class="card shadow-sm">
     <div class="card-body">
-        <table class="table table-hover table-striped">
+        <table class="table table-hover table-striped align-middle">
             <thead class="table-dark">
                 <tr>
                     <th>Usuario</th>
                     <th>Nombre</th>
                     <th>Rol</th>
+                    <th>Estado</th>
                     @if (User.TienePermiso("Usuarios.Editar"))
                     {
                         <th class="text-end">Acciones</th>
@@ -53,12 +54,21 @@
                         <td>
                             <span class="badge bg-secondary">@(item.Rol?.NombreRol ?? "Sin Rol")</span>
                         </td>
+                        <td>
+                            @if (item.Estado == "Activo")
+                            {
+                                <span class="badge bg-success">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactivo</span>
+                            }
+                        </td>
                         @if (User.TienePermiso("Usuarios.Editar"))
                         {
                             <td class="text-end">
                                 <a asp-action="Edit" asp-route-id="@item.IdUsuario" class="btn btn-sm btn-warning">Editar</a>
-                                <!-- El admin general no debe poder eliminarse a sí mismo por error -->
-                                @if (item.NombreUsuario != "admin")
+                                @if (item.Estado == "Activo" && item.NombreUsuario.ToLower() != "admin")
                                 {
                                     <a asp-action="Delete" asp-route-id="@item.IdUsuario" class="btn btn-sm btn-danger">Eliminar</a>
                                 }

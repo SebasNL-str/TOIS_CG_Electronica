@@ -33,3 +33,13 @@
     </select>
     <span asp-validation-for="IdRol" class="text-danger"></span>
 </div>
+
+<!-- NUEVO: Campo Estado -->
+<div class="mb-3">
+    <label asp-for="Estado" class="form-label fw-bold"></label>
+    <select asp-for="Estado" class="form-select">
+        <option value="Activo">Activo</option>
+        <option value="Inactivo">Inactivo</option>
+    </select>
+    <span asp-validation-for="Estado" class="text-danger"></span>
+</div>

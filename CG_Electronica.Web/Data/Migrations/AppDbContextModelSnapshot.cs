@@ -132,17 +132,21 @@ namespace CG_Electronica.Web.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDetalle"));
 
                     b.Property<int>("Cantidad")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("cantidad");
 
                     b.Property<int>("IdFactura")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("idFactura");
 
                     b.Property<int>("IdItem")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("idItem");
 
                     b.Property<decimal>("PrecioUnitarioHistorico")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("precioUnitarioHistorico");
 
                     b.HasKey("IdDetalle");
 
@@ -164,17 +168,23 @@ namespace CG_Electronica.Web.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdFactura"));
 
                     b.Property<string>("CedulaClienteHistorica")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("cedulaClienteHistorica");
 
                     b.Property<string>("Estado")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("estado");
 
                     b.Property<DateTime>("Fecha")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("fecha");
 
                     b.Property<DateTime?>("FechaAnulacion")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("fechaAnulacion");
 
                     b.Property<int>("IdCliente")
                         .HasColumnType("int");
@@ -184,25 +194,34 @@ namespace CG_Electronica.Web.Data.Migrations
 
                     b.Property<decimal>("Iva")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("iva");
 
                     b.Property<string>("NombreClienteHistorico")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("nombreClienteHistorico");
 
                     b.Property<string>("NumeroFactura")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("numeroFactura");
 
                     b.Property<decimal>("Subtotal")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("subtotal");
 
                     b.Property<string>("TelefonoClienteHistorico")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("telefonoClienteHistorico");
 
                     b.Property<decimal>("Total")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("total");
 
                     b.HasKey("IdFactura");
 
