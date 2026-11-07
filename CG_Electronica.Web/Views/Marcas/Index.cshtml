@@ -50,7 +50,12 @@
                         {
                             <td class="text-end">
                                 <a class="btn btn-sm btn-outline-primary" asp-action="Edit" asp-route-id="@item.IdMarca">Editar</a>
-                                <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.IdMarca">Eliminar</a>
+
+                                <!-- AQUÍ ESTÁ LA MAGIA: Solo muestra el botón si está Activo -->
+                                @if (item.Estado == "Activo")
+                                {
+                                    <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.IdMarca">Eliminar</a>
+                                }
                             </td>
                         }
                     </tr>

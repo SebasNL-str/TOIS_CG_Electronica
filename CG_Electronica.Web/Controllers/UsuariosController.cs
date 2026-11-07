@@ -1,10 +1,12 @@
 ﻿using CG_Electronica.Web.Data;
 using CG_Electronica.Web.Models;
+using CG_Electronica.Web.Services; // <-- Agregado para la Auditoría
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity; // Para PasswordHasher
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering; // Para los SelectList
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims; // <-- Agregado para obtener el ID del usuario logueado
 
 namespace CG_Electronica.Web.Controllers
 {
@@ -12,17 +14,18 @@ namespace CG_Electronica.Web.Controllers
     public class UsuariosController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IServicioAuditoria _servicioAuditoria; // <-- Inyectamos la auditoría
 
-        public UsuariosController(AppDbContext context)
+        public UsuariosController(AppDbContext context, IServicioAuditoria servicioAuditoria)
         {
             _context = context;
+            _servicioAuditoria = servicioAuditoria;
         }
 
         // Listado de usuarios, requiere permiso de Ver
         [Authorize(Policy = "Permiso:Usuarios.Ver")]
         public async Task<IActionResult> Index()
         {
-            // Hacemos Include del Rol para poder mostrar su nombre en la tabla
             var usuarios = await _context.Usuarios
                 .Include(u => u.Rol)
                 .ToListAsync();
@@ -30,7 +33,7 @@ namespace CG_Electronica.Web.Controllers
             return View(usuarios);
         }
 
-        // 1. Validación Remota (GET) para verificar que el usuario no exista
+        // 1. Validación Remota (GET)
         [HttpGet]
         public async Task<IActionResult> VerificarNombreUsuario(string nombreUsuario, int idUsuario)
         {
@@ -47,7 +50,6 @@ namespace CG_Electronica.Web.Controllers
         [Authorize(Policy = "Permiso:Usuarios.Editar")]
         public async Task<IActionResult> Create()
         {
-            // Cargamos los roles disponibles para el <select>
             ViewBag.Roles = new SelectList(await _context.Roles.ToListAsync(), "IdRol", "NombreRol");
             return View(new Models.ViewModels.UsuarioViewModel());
         }
@@ -58,7 +60,6 @@ namespace CG_Electronica.Web.Controllers
         [Authorize(Policy = "Permiso:Usuarios.Editar")]
         public async Task<IActionResult> Create(Models.ViewModels.UsuarioViewModel model)
         {
-            // Verificamos si escribió contraseña (en la creación es obligatoria, aunque en el ViewModel la pusimos opcional para la edición)
             if (string.IsNullOrEmpty(model.Clave))
             {
                 ModelState.AddModelError("Clave", "La contraseña es obligatoria para un nuevo usuario.");
@@ -66,7 +67,6 @@ namespace CG_Electronica.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                // Doble validación en el servidor de NombreUsuario único
                 bool existe = await _context.Usuarios
                     .AnyAsync(u => u.NombreUsuario.ToLower() == model.NombreUsuario.ToLower());
 
@@ -80,22 +80,25 @@ namespace CG_Electronica.Web.Controllers
                     {
                         Nombre = model.Nombre,
                         NombreUsuario = model.NombreUsuario,
-                        IdRol = model.IdRol
+                        IdRol = model.IdRol,
+                        Estado = model.Estado // Mapeamos el estado al crear
                     };
 
-                    // HASHEO DE CONTRASEÑA (Nunca se guarda en texto plano)
                     var hasher = new PasswordHasher<Usuario>();
                     nuevoUsuario.Contrasena = hasher.HashPassword(nuevoUsuario, model.Clave!);
 
                     _context.Add(nuevoUsuario);
                     await _context.SaveChangesAsync();
 
+                    // AUDITORÍA: Registrar Creación
+                    int idUsuarioActual = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+                    await _servicioAuditoria.RegistrarAccionAsync("CREAR_USUARIO", $"USUARIO: {nuevoUsuario.IdUsuario}", $"Se creó el usuario {nuevoUsuario.NombreUsuario}.", idUsuarioActual);
+
                     TempData["Ok"] = "Usuario creado exitosamente.";
                     return RedirectToAction(nameof(Index));
                 }
             }
 
-            // Si hubo error, recargamos el select de roles
             ViewBag.Roles = new SelectList(await _context.Roles.ToListAsync(), "IdRol", "NombreRol", model.IdRol);
             return View(model);
         }
@@ -115,7 +118,7 @@ namespace CG_Electronica.Web.Controllers
                 Nombre = usuario.Nombre,
                 NombreUsuario = usuario.NombreUsuario,
                 IdRol = usuario.IdRol,
-                Estado = usuario.Estado // <--- Mapeamos el estado
+                Estado = usuario.Estado
             };
 
             ViewBag.Roles = new SelectList(await _context.Roles.ToListAsync(), "IdRol", "NombreRol", model.IdRol);
@@ -144,7 +147,6 @@ namespace CG_Electronica.Web.Controllers
                     var usuarioDb = await _context.Usuarios.FindAsync(id);
                     if (usuarioDb == null) return NotFound();
 
-                    // Protección: No permitir inactivar al admin principal
                     if (usuarioDb.NombreUsuario.ToLower() == "admin" && model.Estado != "Activo")
                     {
                         ModelState.AddModelError("Estado", "El usuario administrador principal no puede ser inactivado.");
@@ -155,7 +157,7 @@ namespace CG_Electronica.Web.Controllers
                     usuarioDb.Nombre = model.Nombre;
                     usuarioDb.NombreUsuario = model.NombreUsuario;
                     usuarioDb.IdRol = model.IdRol;
-                    usuarioDb.Estado = model.Estado; // <--- Guardamos el estado
+                    usuarioDb.Estado = model.Estado;
 
                     if (!string.IsNullOrEmpty(model.Clave))
                     {
@@ -166,6 +168,10 @@ namespace CG_Electronica.Web.Controllers
                     _context.Update(usuarioDb);
                     await _context.SaveChangesAsync();
 
+                    // AUDITORÍA: Registrar Edición
+                    int idUsuarioActual = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+                    await _servicioAuditoria.RegistrarAccionAsync("EDITAR_USUARIO", $"USUARIO: {usuarioDb.IdUsuario}", $"Se actualizó el usuario {usuarioDb.NombreUsuario} (Estado: {usuarioDb.Estado}).", idUsuarioActual);
+
                     TempData["Ok"] = "Usuario actualizado exitosamente.";
                     return RedirectToAction(nameof(Index));
                 }
@@ -174,8 +180,7 @@ namespace CG_Electronica.Web.Controllers
             return View(model);
         }
 
-
-        // 6. GET: Confirmar Eliminación
+        // GET: Confirmar Eliminación
         [Authorize(Policy = "Permiso:Usuarios.Editar")]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -187,10 +192,9 @@ namespace CG_Electronica.Web.Controllers
 
             if (usuario == null) return NotFound();
 
-            // Protección extra por si se llega por URL
             if (usuario.NombreUsuario.ToLower() == "admin")
             {
-                TempData["Error"] = "No está permitido eliminar la cuenta del administrador principal.";
+                TempData["Error"] = "No está permitido inactivar la cuenta del administrador principal.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -212,11 +216,16 @@ namespace CG_Electronica.Web.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // BORRADO LÓGICO: Cambiamos estado a Inactivo
-                usuario.Estado = "Inactivo";
+                string nombreUsuarioInactivado = usuario.NombreUsuario;
 
+                // BORRADO LÓGICO
+                usuario.Estado = "Inactivo";
                 _context.Update(usuario);
                 await _context.SaveChangesAsync();
+
+                // AUDITORÍA: Registrar Inactivación
+                int idUsuarioActual = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
+                await _servicioAuditoria.RegistrarAccionAsync("INACTIVAR_USUARIO", $"USUARIO: {id}", $"Se inactivó el usuario {nombreUsuarioInactivado}.", idUsuarioActual);
 
                 TempData["Ok"] = "Usuario inactivado correctamente.";
             }

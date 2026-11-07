@@ -89,17 +89,26 @@ public class MarcasController : Controller
     public async Task<IActionResult> Delete(int id)
     {
         var marca = await _context.Marcas.FindAsync(id);
-        if (marca == null) return NotFound();
+        if (marca == null)
+        {
+            TempData["Error"] = $"Error 404: No se encontró ninguna marca con el ID {id}.";
+            return RedirectToAction(nameof(Index));
+        }
 
-        // Evitar borrar marcas con productos asociados (integridad con el módulo de otros integrantes)
+        // Consulta de conteo
         var tieneProductos = await _context.Database
             .SqlQuery<int>($"SELECT COUNT(*) AS Value FROM PRODUCTO WHERE idMarca = {id}")
             .FirstAsync();
+
         if (tieneProductos > 0)
         {
-            TempData["Error"] = "No se puede eliminar: la marca tiene productos asociados.";
+            // Diagnóstico: Te dirá el nombre, el ID recibido y cuántos productos contó C#
+            TempData["Error"] = $"[BLOQUEADO] La marca '{marca.NombreMarca}' (ID: {id}) tiene {tieneProductos} producto(s) asociado(s).";
             return RedirectToAction(nameof(Index));
         }
+
+        // Si C# cree que tiene 0 productos, te lo dirá en un mensaje verde en vez de quedarse callado
+        TempData["Ok"] = $"[PERMITIDO] La marca '{marca.NombreMarca}' (ID: {id}) tiene 0 productos según C#. Intentando abrir vista...";
         return View(marca);
     }
 
@@ -111,14 +120,18 @@ public class MarcasController : Controller
         var marca = await _context.Marcas.FindAsync(id);
         if (marca != null)
         {
-            string nombreMarcaEliminada = marca.NombreMarca;
-            _context.Marcas.Remove(marca);
+            string nombreMarcaInactivada = marca.NombreMarca;
+
+            // 1. BORRADO LÓGICO: Cambiamos estado y actualizamos en lugar de Remove
+            marca.Estado = "Inactivo";
+            _context.Marcas.Update(marca);
             await _context.SaveChangesAsync();
 
+            // 2. AUDITORÍA: Adaptamos el registro para reflejar que fue una inactivación
             int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
-            await _servicioAuditoria.RegistrarAccionAsync("ELIMINAR_MARCA", $"MARCA: {id}", $"Se eliminó la marca {nombreMarcaEliminada}.", idUsuario);
+            await _servicioAuditoria.RegistrarAccionAsync("INACTIVAR_MARCA", $"MARCA: {id}", $"Se inactivó la marca {nombreMarcaInactivada}.", idUsuario);
 
-            TempData["Ok"] = "Marca eliminada correctamente.";
+            TempData["Ok"] = "Marca inactivada correctamente.";
         }
         return RedirectToAction(nameof(Index));
     }

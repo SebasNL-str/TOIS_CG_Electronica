@@ -1,22 +1,37 @@
-﻿@model Marca
+﻿@model CG_Electronica.Web.Models.Marca
+
 @{
-    ViewData["Title"] = "Eliminar marca";
+    ViewData["Title"] = "Confirmar Eliminación";
 }
 
-<h1 class="text-danger">@ViewData["Title"]</h1>
-<hr />
-<div class="alert alert-warning">
-    ¿Seguro que deseas eliminar la marca <strong>@Model.NombreMarca</strong>?
-</div>
-<dl class="row">
-    <dt class="col-sm-2">Estado</dt>
-    <dd class="col-sm-10">
-        <span class="badge @(Model.Estado == "Activo" ? "bg-success" : "bg-secondary")">@Model.Estado</span>
-    </dd>
-</dl>
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm mt-4 border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="bi bi-exclamation-triangle-fill"></i> Eliminar Marca</h4>
+            </div>
+            <div class="card-body">
+                <p class="fs-5 text-danger">¿Está seguro de que desea eliminar esta marca?</p>
 
-<form asp-action="Delete" method="post">
-    <input type="hidden" asp-for="IdMarca" />
-    <button type="submit" class="btn btn-danger">Sí, eliminar</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-</form>
+                <ul class="list-group list-group-flush mb-4">
+                    <li class="list-group-item"><strong>Nombre de la Marca:</strong> @Model.NombreMarca</li>
+                    <li class="list-group-item"><strong>Estado Actual:</strong> @Model.Estado</li>
+                </ul>
+
+                <form asp-action="Delete" method="post">
+                    <!-- LA SOLUCIÓN ESTÁ AQUÍ: name="id" -->
+                    <input type="hidden" name="id" value="@Model.IdMarca" />
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Sí, Eliminar
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
