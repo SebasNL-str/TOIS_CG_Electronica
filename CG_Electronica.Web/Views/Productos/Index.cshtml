@@ -1,28 +1,53 @@
 @model IEnumerable<CG_Electronica.Web.Models.Producto>
+@using CG_Electronica.Web.Helpers
 
 @{
     ViewData["Title"] = "Gestión de Productos";
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Productos</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
-        <li class="breadcrumb-item active">Productos</li>
-    </ol>
-
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div>
-                <i class="fas fa-box me-1"></i> Listado de Productos e Inventario
-            </div>
-            <a asp-action="Create" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Nuevo Producto
-            </a>
+    <!-- Encabezado y Breadcrumbs -->
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <div>
+            <h1 class="mb-0">Productos</h1>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+                <li class="breadcrumb-item active">Productos</li>
+            </ol>
         </div>
-        <div class="card-body">
+        @if (User.TienePermiso("Productos.Editar"))
+        {
+            <a asp-action="Create" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i> Nuevo Producto
+            </a>
+        }
+    </div>
+
+    <!-- Alertas TempData -->
+    @if (TempData["Ok"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Ok"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Tarjeta Principal con Tabla -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+            <span class="fw-bold"><i class="bi bi-box-seam me-2"></i>Listado de Productos e Inventario</span>
+            <span class="badge bg-secondary">Total: @Model.Count()</span>
+        </div>
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-bordered table-striped align-middle">
+                <table class="table table-striped table-hover align-middle mb-0">
                     <thead class="table-dark">
                         <tr>
                             <th>Descripción</th>
@@ -32,54 +57,71 @@
                             <th>P. Venta</th>
                             <th>Stock</th>
                             <th>Estado</th>
-                            <th class="text-center">Acciones</th>
+                            @if (User.TienePermiso("Productos.Editar"))
+                            {
+                                <th class="text-center">Acciones</th>
+                            }
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model)
+                        @if (!Model.Any())
                         {
                             <tr>
-                                <td><strong>@item.Descripcion</strong></td>
-                                <div>
-                                    <td>
-                                        <small class="text-muted">Mod:</small> @(item.Modelo ?? "N/A")<br />
-                                        <small class="text-muted">Fab:</small> @(item.CodigoFabricante ?? "N/A")
-                                    </td>
-                                </div>
-                                <td>
-                                    <span class="badge bg-secondary">@item.Marca?.NombreMarca</span>
-                                    <span class="badge bg-info text-dark">@item.Categoria?.NombreCategoria</span>
-                                </td>
-                                <td>$@item.PrecioCompra.ToString("N2")</td>
-                                <td>$@item.PrecioVenta.ToString("N2")</td>
-                                <td>
-                                    @if (item.Existencias <= item.ExistenciasMinimas)
-                                    {
-                                        <span class="badge bg-danger" title="Stock bajo o igual al mínimo (@item.ExistenciasMinimas)">
-                                            @item.Existencias (Stock Bajo)
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-success">@item.Existencias</span>
-                                    }
-                                </td>
-                                <td>
-                                    @if (item.Estado == "Activo")
-                                    {
-                                        <span class="badge bg-success">Activo</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">@item.Estado</span>
-                                    }
-                                </td>
-                                <td class="text-center">
-                                    <a asp-action="Edit" asp-route-id="@item.IdItem" class="btn btn-warning btn-sm" title="Editar">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </a>
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                                    No hay productos registrados en el sistema.
                                 </td>
                             </tr>
+                        }
+                        else
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td><strong>@item.Descripcion</strong></td>
+                                    <td>
+                                        <small class="text-muted d-block">Mod: @(item.Modelo ?? "N/A")</small>
+                                        <small class="text-muted d-block">Fab: @(item.CodigoFabricante ?? "N/A")</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary me-1">@(item.Marca?.NombreMarca ?? "Sin Marca")</span>
+                                        <span class="badge bg-info text-dark">@(item.Categoria?.NombreCategoria ?? "Sin Categoría")</span>
+                                    </td>
+                                    <!-- Precios en Córdobas (C$) -->
+                                    <td class="fw-semibold">C$ @item.PrecioCompra.ToString("N2")</td>
+                                    <td class="fw-semibold text-primary">C$ @item.PrecioVenta.ToString("N2")</td>
+                                    <td>
+                                        @if (item.Existencias <= item.ExistenciasMinimas)
+                                        {
+                                            <span class="badge bg-danger shadow-sm" title="Stock bajo o igual al mínimo (@item.ExistenciasMinimas)">
+                                                <i class="bi bi-exclamation-triangle me-1"></i>@item.Existencias (Stock Bajo)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">@item.Existencias</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (item.Estado == "Activo")
+                                        {
+                                            <span class="badge bg-success">Activo</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inactivo</span>
+                                        }
+                                    </td>
+                                    @if (User.TienePermiso("Productos.Editar"))
+                                    {
+                                        <td class="text-center">
+                                            <a asp-action="Edit" asp-route-id="@item.IdItem" class="btn btn-warning btn-sm shadow-sm" title="Editar Producto">
+                                                <i class="bi bi-pencil-square"></i> Editar
+                                            </a>
+                                        </td>
+                                    }
+                                </tr>
+                            }
                         }
                     </tbody>
                 </table>

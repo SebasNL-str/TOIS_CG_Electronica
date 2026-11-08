@@ -1,92 +1,168 @@
 @model IEnumerable<CG_Electronica.Web.Models.Factura>
+@using CG_Electronica.Web.Helpers
 
 @{
     ViewData["Title"] = "Historial de Facturas";
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Facturación</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
-        <li class="breadcrumb-item active">Facturas</li>
-    </ol>
-
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div><i class="fas fa-file-invoice-dollar me-1"></i> Listado de Facturas Emitidas</div>
-            <a asp-action="Create" class="btn btn-primary btn-sm">
-                <i class="fas fa-cash-register"></i> Nueva Factura (Venta)
-            </a>
+    <!-- Encabezado y Breadcrumbs -->
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <div>
+            <h1 class="mb-0">Facturación</h1>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+                <li class="breadcrumb-item active">Facturas</li>
+            </ol>
         </div>
-        <div class="card-body">
-            <form method="get" class="row g-2 mb-3">
+        @if (User.TienePermiso("Facturas.Crear"))
+        {
+            <a asp-action="Create" class="btn btn-primary shadow-sm">
+                <i class="bi bi-receipt me-1"></i> Nueva Factura (Venta)
+            </a>
+        }
+    </div>
+
+    <!-- Alertas TempData -->
+    @if (TempData["Ok"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["Ok"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Tarjeta Principal con Estilo Dark -->
+    <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+            <span class="fw-bold">
+                <i class="bi bi-receipt-cutoff me-2"></i>Listado de Facturas Emitidas
+            </span>
+            <span class="badge bg-secondary">Total: @(Model?.Count() ?? 0)</span>
+        </div>
+
+        <div class="card-body p-4">
+            <!-- Filtros de Búsqueda (Solo Emitida y Anulada) -->
+            <form method="get" class="row g-2 mb-4">
                 <div class="col-md-5">
-                    <input name="busqueda" value="@ViewBag.Busqueda" class="form-control" placeholder="Buscar por número o cliente" />
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary border-opacity-50 text-white-50">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input name="busqueda" value="@ViewBag.Busqueda" class="form-control" placeholder="Buscar por N° factura o nombre de cliente..." />
+                    </div>
                 </div>
                 <div class="col-md-3">
                     <select name="estado" class="form-select">
                         <option value="">Todos los estados</option>
-                        @if (ViewBag.Estado == "Emitida")
-                        {
-                            <option value="Emitida" selected>Emitida</option>
-                        }
-                        else
-                        {
-                            <option value="Emitida">Emitida</option>
-                        }
-                        @if (ViewBag.Estado == "Anulada")
-                        {
-                            <option value="Anulada" selected>Anulada</option>
-                        }
-                        else
-                        {
-                            <option value="Anulada">Anulada</option>
-                        }
+                        <option value="Emitida" selected="@(ViewBag.Estado == "Emitida")">Emitida</option>
+                        <option value="Anulada" selected="@(ViewBag.Estado == "Anulada")">Anulada</option>
                     </select>
                 </div>
-                <div class="col-md-2"><button class="btn btn-outline-primary w-100">Filtrar</button></div>
-                <div class="col-md-2"><a asp-action="Index" class="btn btn-outline-secondary w-100">Limpiar</a></div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 shadow-sm">
+                        <i class="bi bi-funnel-fill me-1"></i> Filtrar
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <a asp-action="Index" class="btn btn-outline-light w-100">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Limpiar
+                    </a>
+                </div>
             </form>
+
             <div class="table-responsive">
-                <table class="table table-bordered table-striped align-middle">
+                <table class="table table-striped table-hover align-middle mb-0">
                     <thead class="table-dark">
                         <tr>
                             <th>N° Factura</th>
-                            <th>Fecha</th>
+                            <th>Fecha y Hora</th>
                             <th>Cliente</th>
-                            <th>Subtotal</th>
-                            <th>IVA (15%)</th>
-                            <th>Total</th>
-                            <th>Estado</th>
-                            <th>Usuario</th>
+                            <th class="text-end">Subtotal</th>
+                            <th class="text-end">IVA (15%)</th>
+                            <th class="text-end">Total</th>
+                            <th class="text-center">Estado</th>
+                            <th>Cajero / Usuario</th>
                             <th class="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model)
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <!-- N° Factura -->
+                                    <td class="fw-bold text-nowrap">
+                                        <i class="bi bi-file-earmark-text text-primary me-1"></i>@item.NumeroFactura
+                                    </td>
+
+                                    <!-- Fecha -->
+                                    <td class="small text-nowrap">
+                                        <i class="bi bi-calendar3 me-1 text-muted"></i>@item.Fecha.ToString("yyyy-MM-dd HH:mm")
+                                    </td>
+
+                                    <!-- Cliente Histórico o Relacionado -->
+                                    <td>
+                                        <span class="fw-semibold">@(item.NombreClienteHistorico ?? item.Cliente?.NombreCliente ?? "Cliente N/A")</span>
+                                    </td>
+
+                                    <!-- Valores en Córdobas (C$) -->
+                                    <td class="text-end text-nowrap">C$ @item.Subtotal.ToString("N2")</td>
+                                    <td class="text-end text-nowrap text-muted">C$ @item.Iva.ToString("N2")</td>
+                                    <td class="text-end text-nowrap fw-bold text-primary">
+                                        C$ @item.Total.ToString("N2")
+                                    </td>
+
+                                    <!-- Estado Comercial: Emitida (Válida) o Anulada -->
+                                    <td class="text-center">
+                                        @if (item.Estado == "Emitida")
+                                        {
+                                            <span class="badge bg-success bg-opacity-75 px-2 py-1">
+                                                <i class="bi bi-check2-circle me-1"></i>Emitida
+                                            </span>
+                                        }
+                                        else if (item.Estado == "Anulada")
+                                        {
+                                            <span class="badge bg-danger bg-opacity-75 px-2 py-1">
+                                                <i class="bi bi-x-circle me-1"></i>Anulada
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@item.Estado</span>
+                                        }
+                                    </td>
+
+                                    <!-- Usuario Responsable -->
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            <i class="bi bi-person me-1"></i>@(item.Usuario?.NombreUsuario ?? "N/A")
+                                        </span>
+                                    </td>
+
+                                    <!-- Acciones -->
+                                    <td class="text-center">
+                                        <a asp-action="Details" asp-route-id="@item.IdFactura" class="btn btn-info btn-sm text-white shadow-sm" title="Ver Detalle de Factura">
+                                            <i class="bi bi-eye"></i> Detalle
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td><strong>@item.NumeroFactura</strong></td>
-                                <td>@item.Fecha.ToString("yyyy-MM-dd HH:mm")</td>
-                                <td>@(item.NombreClienteHistorico ?? item.Cliente?.NombreCliente)</td>
-                                <td>$@item.Subtotal.ToString("N2")</td>
-                                <td>$@item.Iva.ToString("N2")</td>
-                                <td><strong>$@item.Total.ToString("N2")</strong></td>
-                                <td>
-                                    @if (item.Estado == "Emitida")
-                                    {
-                                        <span class="badge bg-success">Emitida</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">@item.Estado</span>
-                                    }
-                                </td>
-                                <td>@item.Usuario?.NombreUsuario</td>
-                                <td class="text-center">
-                                    <a asp-action="Details" asp-route-id="@item.IdFactura" class="btn btn-info btn-sm text-white" title="Ver Detalle">
-                                        <i class="fas fa-eye"></i> Detalle
-                                    </a>
+                                <td colspan="9" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                                    No se encontraron facturas con los filtros seleccionados.
                                 </td>
                             </tr>
                         }

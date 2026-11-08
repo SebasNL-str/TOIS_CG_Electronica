@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CG_Electronica.Web.Authorization;
 
@@ -13,10 +14,23 @@ public class PermisoHandler : AuthorizationHandler<PermisoRequirement>
     protected override Task HandleRequirementAsync(
         AuthorizationHandlerContext context, PermisoRequirement requirement)
     {
-        if (context.User.HasClaim("Permiso", requirement.Permiso))
+        var permisoRequerido = requirement.Permiso?.Trim();
+
+        if (!string.IsNullOrEmpty(permisoRequerido))
         {
-            context.Succeed(requirement);
+            // Búsqueda robusta para CUALQUIER ROL:
+            // 1. Limpia espacios en blanco (.Trim()) tanto del claim como del requirement
+            // 2. Compara ignorando mayúsculas y minúsculas (OrdinalIgnoreCase)
+            bool tienePermiso = context.User.Claims.Any(c =>
+                c.Type == "Permiso" &&
+                string.Equals(c.Value.Trim(), permisoRequerido, StringComparison.OrdinalIgnoreCase));
+
+            if (tienePermiso)
+            {
+                context.Succeed(requirement);
+            }
         }
+
         return Task.CompletedTask;
     }
 }

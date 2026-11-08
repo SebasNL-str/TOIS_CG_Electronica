@@ -23,26 +23,31 @@ public class ProductosController : Controller
         _servicioAuditoria = servicioAuditoria;
     }
 
+    // Listado de productos: Requiere permiso de Ver Productos
+    [Authorize(Policy = "Permiso:Productos.Ver")]
     public async Task<IActionResult> Index()
     {
         var productos = await _context.Productos
-        .Include(p => p.Marca)
-        .Include(p => p.Categoria)
-        .ToListAsync();
+            .Include(p => p.Marca)
+            .Include(p => p.Categoria)
+            .ToListAsync();
         return View(productos);
     }
 
+    // GET: Productos/Create
+    [Authorize(Policy = "Permiso:Productos.Editar")]
     public IActionResult Create()
     {
         CargarListasSelect();
         return View();
     }
 
+    // POST: Productos/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Policy = "Permiso:Productos.Editar")]
     public async Task<IActionResult> Create(Producto producto, decimal precioCompraInicial, int stockInicial)
     {
-        // Limpiar validaciones de navegación que no vienen del formulario
         ModelState.Remove(nameof(producto.Marca));
         ModelState.Remove(nameof(producto.Categoria));
         ModelState.Remove(nameof(producto.DetallesFactura));
@@ -52,20 +57,25 @@ public class ProductosController : Controller
         {
             int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
 
-            // 1. Crear el ItemFacturable base
-            producto.Existencias = 0; // Se inicializa mediante movimiento de entrada inicial
+            producto.Existencias = 0;
             producto.PrecioCompra = precioCompraInicial;
             _context.ItemsFacturables.Add(producto);
-            await _context.SaveChangesAsync(); // Esto genera el idItem compartido
+            await _context.SaveChangesAsync();
 
-            // 2. Si hay stock inicial, registrar la entrada mediante el servicio de inventario
             if (stockInicial > 0)
             {
-                await _servicioInventario.RegistrarEntradaAsync(producto.IdItem, stockInicial, precioCompraInicial, "Entrada por compra", idUsuario, "Inventario inicial de creación");
+                await _servicioInventario.RegistrarEntradaAsync(
+                    producto.IdItem,
+                    stockInicial,
+                    precioCompraInicial,
+                    "Entrada por compra",
+                    idUsuario,
+                    "Inventario inicial de creación");
             }
 
             await _servicioAuditoria.RegistrarAccionAsync("CREAR_PRODUCTO", $"PRODUCTO: {producto.IdItem}", $"Se creó el producto {producto.Descripcion}.", idUsuario);
 
+            TempData["Ok"] = "Producto creado exitosamente.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -75,13 +85,13 @@ public class ProductosController : Controller
 
     // GET: Productos/Edit/5
     [HttpGet]
-    [Authorize(Policy = "Permiso:Productos.Editar")]
+    [Authorize(Policy = "Permiso:Productos.Editar")] // <-- Oficial: Permiso específico de Productos
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null) return NotFound();
 
         var producto = await _context.Productos
-        .FirstOrDefaultAsync(p => p.IdItem == id);
+            .FirstOrDefaultAsync(p => p.IdItem == id);
 
         if (producto == null) return NotFound();
 
@@ -93,7 +103,7 @@ public class ProductosController : Controller
     // POST: Productos/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Policy = "Permiso:Productos.Editar")]
+    [Authorize(Policy = "Permiso:Productos.Editar")] // <-- Oficial: Permiso específico de Productos
     public async Task<IActionResult> Edit(int id, Producto producto)
     {
         if (id != producto.IdItem) return NotFound();
@@ -108,12 +118,11 @@ public class ProductosController : Controller
             try
             {
                 var productoDb = await _context.Productos
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.IdItem == id);
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(p => p.IdItem == id);
 
                 if (productoDb == null) return NotFound();
 
-                // Preservar exclusivamente las existencias actuales (el nuevo PrecioCompra del formulario se conserva).
                 producto.Existencias = productoDb.Existencias;
 
                 _context.Update(producto);
@@ -121,6 +130,8 @@ public class ProductosController : Controller
 
                 int idUsuario = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var uid) ? uid : 1;
                 await _servicioAuditoria.RegistrarAccionAsync("EDITAR_PRODUCTO", $"PRODUCTO: {producto.IdItem}", $"Se modificó el producto {producto.Descripcion}.", idUsuario);
+
+                TempData["Ok"] = "Producto modificado correctamente.";
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -134,7 +145,6 @@ public class ProductosController : Controller
         }
 
         CargarListasSelect(producto.IdMarca, producto.IdCategoria);
-
         return View(producto);
     }
 
@@ -147,20 +157,20 @@ public class ProductosController : Controller
     {
         ViewBag.IdMarca = new SelectList(
             _context.Marcas
-            .Where(m => m.Estado == "Activo")
-            .ToList(),
-                                         "IdMarca",
-                                         "NombreMarca",
-                                         idMarcaSeleccionada
+                .Where(m => m.Estado == "Activo")
+                .ToList(),
+            "IdMarca",
+            "NombreMarca",
+            idMarcaSeleccionada
         );
 
         ViewBag.IdCategoria = new SelectList(
             _context.Categorias
-            .Where(c => c.Estado == "Activo")
-            .ToList(),
-                                             "IdCategoria",
-                                             "NombreCategoria",
-                                             idCategoriaSeleccionada
+                .Where(c => c.Estado == "Activo")
+                .ToList(),
+            "IdCategoria",
+            "NombreCategoria",
+            idCategoriaSeleccionada
         );
     }
 }

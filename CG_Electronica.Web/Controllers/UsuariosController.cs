@@ -1,12 +1,12 @@
 ﻿using CG_Electronica.Web.Data;
 using CG_Electronica.Web.Models;
-using CG_Electronica.Web.Services; // <-- Agregado para la Auditoría
+using CG_Electronica.Web.Services; 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims; // <-- Agregado para obtener el ID del usuario logueado
+using System.Security.Claims; 
 
 namespace CG_Electronica.Web.Controllers
 {
@@ -14,7 +14,7 @@ namespace CG_Electronica.Web.Controllers
     public class UsuariosController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly IServicioAuditoria _servicioAuditoria; // <-- Inyectamos la auditoría
+        private readonly IServicioAuditoria _servicioAuditoria; 
 
         public UsuariosController(AppDbContext context, IServicioAuditoria servicioAuditoria)
         {
@@ -201,7 +201,7 @@ namespace CG_Electronica.Web.Controllers
             return View(usuario);
         }
 
-        // POST: Delete (BORRADO LÓGICO / INACTIVACIÓN)
+        // POST: Delete 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "Permiso:Usuarios.Editar")]
@@ -218,7 +218,7 @@ namespace CG_Electronica.Web.Controllers
 
                 string nombreUsuarioInactivado = usuario.NombreUsuario;
 
-                // BORRADO LÓGICO
+                
                 usuario.Estado = "Inactivo";
                 _context.Update(usuario);
                 await _context.SaveChangesAsync();

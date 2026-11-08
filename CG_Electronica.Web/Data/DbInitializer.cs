@@ -10,7 +10,7 @@ public static class DbInitializer
     {
         var hasher = new PasswordHasher<Usuario>();
 
-        // ---------- PERMISOS (solo si no existen) ----------
+        
         var permisosBase = new[]
         {
             ("Usuarios.Ver", "Ver usuarios"), ("Usuarios.Editar", "Crear, editar y eliminar usuarios"),
@@ -24,7 +24,6 @@ public static class DbInitializer
         var permisosFaltantesIniciales = permisosBase.Where(p => !context.Permisos.Any(db => db.NombrePermiso == p.Item1)).Select(p => new Permiso { NombrePermiso = p.Item1, Descripcion = p.Item2 }).ToList();
         if (permisosFaltantesIniciales.Count > 0) { context.Permisos.AddRange(permisosFaltantesIniciales); context.SaveChanges(); }
 
-        // ---------- ROL ADMINISTRADOR ----------
         var rolAdmin = context.Roles
             .Include(r => r.RolPermisos)
             .FirstOrDefault(r => r.NombreRol == "Administrador");
@@ -52,7 +51,7 @@ public static class DbInitializer
         }
         if (permisosFaltantes.Any()) context.SaveChanges();
 
-        // ---------- USUARIO ADMIN (siempre existe y con contraseña válida) ----------
+        
         var admin = context.Usuarios
             .FirstOrDefault(u => u.NombreUsuario == "admin");
 

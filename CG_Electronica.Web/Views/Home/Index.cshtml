@@ -1,148 +1,103 @@
 ﻿@model CG_Electronica.Web.Models.ViewModels.DashboardViewModel
+@using CG_Electronica.Web.Helpers
 
 @{
     ViewData["Title"] = "Panel de Control";
-    var nombreUsuario = User.Identity?.Name ?? "Usuario";
+    var nombreUsuario = User.NombreCompleto();
+    if (string.IsNullOrEmpty(nombreUsuario))
+    {
+        nombreUsuario = User.Identity?.Name ?? "Usuario";
+    }
 }
 
 <div class="container-fluid px-4">
 
-    <!-- Encabezado -->
+    <!-- Encabezado de Bienvenida -->
     <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
         <div>
-            <h1 class="h3 mb-0">Panel de Control</h1>
-            <p class="mb-0">
-                Bienvenido de nuevo, <strong>@nombreUsuario</strong>.
-                Aquí tienes una visión general de las operaciones.
+            <h1 class="h3 mb-0 text-white fw-bold">Panel de Control</h1>
+            <p class="mb-0 text-white-50">
+                Bienvenido de nuevo, <strong class="text-white">@nombreUsuario</strong>.
+                Aquí tienes la visión general de las operaciones del sistema.
             </p>
         </div>
 
         <div>
-            <span class="badge bg-primary fs-6 p-2 shadow-sm">
-                <i class="fas fa-calendar-alt me-1"></i>
-                @DateTime.Now.ToString(
-                    "dd 'de' MMMM 'de' yyyy",
-                    new System.Globalization.CultureInfo("es-ES")
-                )
+            <span class="badge bg-primary bg-opacity-75 border border-primary border-opacity-50 fs-6 p-2 shadow-sm rounded-pill px-3">
+                <i class="bi bi-calendar3 me-1"></i>
+                @DateTime.Now.ToString("dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-ES"))
             </span>
         </div>
     </div>
 
-    <!-- Fila de Tarjetas Informativas -->
-    <div class="row">
+    <!-- Fila de Tarjetas Informativas (KPIs) en Modo Oscuro -->
+    <div class="row g-3 mb-4">
 
-        <!-- Ventas del Período -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card shadow h-100 py-2 border-0 border-start border-4 border-primary">
-                <div class="card-body">
-                    <div class="row g-0 align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs fw-bold text-uppercase mb-1"
-                                 style="color: var(--db-accent);">
-                                Ventas Totales
-                            </div>
-
-                            <div class="h5 mb-0 fw-bold"
-                                 style="color: var(--db-text-main);">
-                                @Model.TotalVentasPeriodo.ToString("C2")
-                            </div>
-                        </div>
-
-                        <div class="col-auto">
-                            <i class="fas fa-dollar-sign fa-2x opacity-50"
-                               style="color: var(--db-accent);"></i>
-                        </div>
+        <!-- Ventas Totales en Córdobas (C$) -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 h-100 p-3"
+                 style="background-color: #111c30; border-left: 5px solid #0d6efd !important;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-white-50 fw-semibold text-uppercase small" style="font-size: 0.75rem;">Ventas Totales</span>
+                        <h3 class="mb-0 text-primary fw-bold mt-1">C$ @Model.TotalVentasPeriodo.ToString("N2")</h3>
+                    </div>
+                    <div class="d-inline-flex p-3 rounded-circle bg-primary bg-opacity-25 text-primary">
+                        <i class="bi bi-cash-stack fs-2"></i>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Facturas Emitidas -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card shadow h-100 py-2 border-0 border-start border-4"
-                 style="border-left-color: var(--success-text) !important;">
-                <div class="card-body">
-                    <div class="row g-0 align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs fw-bold text-uppercase mb-1"
-                                 style="color: var(--success-text);">
-                                Facturas Emitidas
-                            </div>
-
-                            <div class="h5 mb-0 fw-bold"
-                                 style="color: var(--db-text-main);">
-                                @Model.CantidadFacturasEmitidas
-
-                                <span class="small fw-normal"
-                                      style="color: var(--db-text-muted);">
-                                    (Anuladas: @Model.CantidadFacturasAnuladas)
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="col-auto">
-                            <i class="fas fa-file-invoice-dollar fa-2x opacity-50"
-                               style="color: var(--success-text);"></i>
-                        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 h-100 p-3"
+                 style="background-color: #111c30; border-left: 5px solid #198754 !important;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-white-50 fw-semibold text-uppercase small" style="font-size: 0.75rem;">Facturas Emitidas</span>
+                        <h3 class="mb-0 text-white fw-bold mt-1">
+                            @Model.CantidadFacturasEmitidas
+                            <small class="text-white-50 fs-6 fw-normal">(Anuladas: @Model.CantidadFacturasAnuladas)</small>
+                        </h3>
+                    </div>
+                    <div class="d-inline-flex p-3 rounded-circle bg-success bg-opacity-25 text-success">
+                        <i class="bi bi-receipt fs-2"></i>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Clientes Registrados -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card shadow h-100 py-2 border-0 border-start border-4"
-                 style="border-left-color: var(--db-accent) !important;">
-                <div class="card-body">
-                    <div class="row g-0 align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs fw-bold text-uppercase mb-1"
-                                 style="color: var(--db-accent);">
-                                Clientes Totales
-                            </div>
-
-                            <div class="h5 mb-0 fw-bold"
-                                 style="color: var(--db-text-main);">
-                                @Model.TotalClientes
-                            </div>
-                        </div>
-
-                        <div class="col-auto">
-                            <i class="fas fa-users fa-2x opacity-50"
-                               style="color: var(--db-accent);"></i>
-                        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 h-100 p-3"
+                 style="background-color: #111c30; border-left: 5px solid #0dcaf0 !important;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-white-50 fw-semibold text-uppercase small" style="font-size: 0.75rem;">Clientes Registrados</span>
+                        <h3 class="mb-0 text-white fw-bold mt-1">@Model.TotalClientes</h3>
+                    </div>
+                    <div class="d-inline-flex p-3 rounded-circle bg-info bg-opacity-25 text-info">
+                        <i class="bi bi-people-fill fs-2"></i>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Alerta de Stock Bajo -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card shadow h-100 py-2 border-0 border-start border-4"
-                 style="border-left-color: @(Model.ProductosStockBajo > 0 ? "var(--danger-text)" : "var(--warning-text)") !important;">
-                <div class="card-body">
-                    <div class="row g-0 align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs fw-bold text-uppercase mb-1"
-                                 style="color: @(Model.ProductosStockBajo > 0 ? "var(--danger-text)" : "var(--warning-text)");">
-                                Stock Crítico
-                            </div>
-
-                            <div class="h5 mb-0 fw-bold"
-                                 style="color: var(--db-text-main);">
-                                @Model.ProductosStockBajo
-
-                                <span class="small fw-normal"
-                                      style="color: var(--db-text-muted);">
-                                    / @Model.TotalProductos prod.
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="col-auto">
-                            <i class="fas fa-exclamation-triangle fa-2x opacity-50"
-                               style="color: @(Model.ProductosStockBajo > 0 ? "var(--danger-text)" : "var(--warning-text)");"></i>
-                        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 h-100 p-3"
+                 style="background-color: #111c30; border-left: 5px solid @(Model.ProductosStockBajo > 0 ? "#dc3545" : "#ffc107") !important;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-white-50 fw-semibold text-uppercase small" style="font-size: 0.75rem;">Stock Crítico</span>
+                        <h3 class="mb-0 @(Model.ProductosStockBajo > 0 ? "text-danger" : "text-warning") fw-bold mt-1">
+                            @Model.ProductosStockBajo
+                            <small class="text-white-50 fs-6 fw-normal">/ @Model.TotalProductos prod.</small>
+                        </h3>
+                    </div>
+                    <div class="d-inline-flex p-3 rounded-circle @(Model.ProductosStockBajo > 0 ? "bg-danger text-danger" : "bg-warning text-warning") bg-opacity-25">
+                        <i class="bi bi-exclamation-triangle-fill fs-2"></i>
                     </div>
                 </div>
             </div>
@@ -150,77 +105,54 @@
 
     </div>
 
-    <!-- Accesos Rápidos con Restricción de Permisos -->
+    <!-- Accesos Rápidos  -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card shadow-sm border-0">
-
-                <div class="card-header fw-bold">
-                    <i class="fas fa-bolt me-1"></i>
-                    Accesos Rápidos
+            <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 overflow-hidden" style="background-color: #111c30;">
+                <div class="card-header bg-dark text-white py-3 border-bottom border-secondary border-opacity-25 fw-bold">
+                    <i class="bi bi-lightning-charge-fill text-warning me-2"></i>Accesos Rápidos
                 </div>
-
-                <div class="card-body">
+                <div class="card-body p-4">
                     <div class="d-flex flex-wrap gap-2">
 
-                        <a asp-controller="Facturas"
-                           asp-action="Create"
-                           class="btn btn-primary">
-                            <i class="fas fa-file-invoice me-1"></i>
-                            Nueva Factura
+                        <a asp-controller="Facturas" asp-action="Create" class="btn btn-primary rounded-pill px-3 shadow-sm">
+                            <i class="bi bi-receipt me-1"></i> Nueva Factura
                         </a>
 
                         @if (Model.TienePermisoCatalogos)
                         {
-                            <a asp-controller="Productos"
-                               asp-action="Index"
-                               class="btn btn-secondary">
-                                <i class="fas fa-box me-1"></i>
-                                Productos
+                            <a asp-controller="Productos" asp-action="Index" class="btn btn-outline-light rounded-pill px-3">
+                                <i class="bi bi-box-seam me-1"></i> Productos
                             </a>
 
-                            <a asp-controller="Servicios"
-                               asp-action="Index"
-                               class="btn btn-secondary">
-                                <i class="fas fa-concierge-bell me-1"></i>
-                                Servicios
+                            <a asp-controller="Servicios" asp-action="Index" class="btn btn-outline-light rounded-pill px-3">
+                                <i class="bi bi-tools me-1"></i> Servicios
                             </a>
 
-                            <a asp-controller="Categorias"
-                               asp-action="Index"
-                               class="btn btn-secondary">
-                                <i class="fas fa-tags me-1"></i>
-                                Categorías y Marcas
+                            <a asp-controller="Categorias" asp-action="Index" class="btn btn-outline-light rounded-pill px-3">
+                                <i class="bi bi-tags me-1"></i> Categorías y Marcas
                             </a>
                         }
 
                         @if (Model.TienePermisoInventario)
                         {
-                            <a asp-controller="Inventario"
-                               asp-action="Index"
-                               class="btn btn-success">
-                                <i class="fas fa-warehouse me-1"></i>
-                                Inventario
+                            <!-- Se deja simplemente como "Inventario" como solicitaste -->
+                            <a asp-controller="Inventario" asp-action="Index" class="btn btn-outline-success rounded-pill px-3">
+                                <i class="bi bi-boxes me-1"></i> Inventario
                             </a>
                         }
 
                         @if (Model.TienePermisoClientes)
                         {
-                            <a asp-controller="Clientes"
-                               asp-action="Index"
-                               class="btn btn-info">
-                                <i class="fas fa-address-book me-1"></i>
-                                Clientes
+                            <a asp-controller="Clientes" asp-action="Index" class="btn btn-outline-info rounded-pill px-3">
+                                <i class="bi bi-people me-1"></i> Clientes
                             </a>
                         }
 
                         @if (Model.TienePermisoAuditoria)
                         {
-                            <a asp-controller="Auditoria"
-                               asp-action="Index"
-                               class="btn btn-secondary">
-                                <i class="fas fa-history me-1"></i>
-                                Auditoría
+                            <a asp-controller="Auditoria" asp-action="Index" class="btn btn-outline-secondary rounded-pill px-3">
+                                <i class="bi bi-shield-check me-1"></i> Auditoría
                             </a>
                         }
 
@@ -230,30 +162,23 @@
         </div>
     </div>
 
-    <!-- Actividad Reciente (Condicionada al Permiso de Auditoría) -->
+    <!-- Actividad Reciente  -->
     @if (Model.TienePermisoAuditoria)
     {
-        <div class="card shadow-sm border-0 mb-4">
-
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>
-                    <i class="fas fa-stream me-1"></i>
-                    Actividad Reciente del Sistema
+        <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 overflow-hidden mb-4" style="background-color: #111c30;">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3 border-bottom border-secondary border-opacity-25">
+                <span class="fw-bold">
+                    <i class="bi bi-activity text-info me-2"></i>Actividad Reciente del Sistema
                 </span>
-
-                <a asp-controller="Auditoria"
-                   asp-action="Index"
-                   class="btn btn-sm btn-secondary">
-                    Ver Todo
+                <a asp-controller="Auditoria" asp-action="Index" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                    <i class="bi bi-arrow-right me-1"></i>Ver Todo
                 </a>
             </div>
 
             <div class="card-body p-0">
                 <div class="table-responsive">
-
                     <table class="table table-striped table-hover mb-0 align-middle">
-
-                        <thead>
+                        <thead class="table-dark">
                             <tr>
                                 <th>Fecha / Hora</th>
                                 <th>Acción</th>
@@ -261,29 +186,27 @@
                                 <th>Usuario</th>
                             </tr>
                         </thead>
-
                         <tbody>
                             @if (Model.UltimasAuditorias != null && Model.UltimasAuditorias.Any())
                             {
                                 foreach (var item in Model.UltimasAuditorias)
                                 {
                                     <tr>
-                                        <td>
-                                            @item.FechaHora.ToString("yyyy-MM-dd HH:mm:ss")
+                                        <td class="small text-white-50 text-nowrap">
+                                            <i class="bi bi-clock me-1 text-muted"></i>@item.FechaHora.ToString("yyyy-MM-dd HH:mm:ss")
                                         </td>
-
                                         <td>
-                                            <span class="badge bg-info">
+                                            <span class="badge bg-info bg-opacity-75 text-white">
                                                 @item.Accion
                                             </span>
                                         </td>
-
                                         <td>
-                                            <code>@item.RegistroAfectado</code>
+                                            <code class="text-info border border-secondary border-opacity-50 px-2 py-1 rounded" style="background-color: rgba(0,0,0,0.4);">
+                                                @item.RegistroAfectado
+                                            </code>
                                         </td>
-
-                                        <td>
-                                            @(item.Usuario?.NombreUsuario ?? "Sistema")
+                                        <td class="fw-semibold text-white">
+                                            <i class="bi bi-person me-1 text-secondary"></i>@(item.Usuario?.NombreUsuario ?? "Sistema")
                                         </td>
                                     </tr>
                                 }
@@ -291,17 +214,14 @@
                             else
                             {
                                 <tr>
-                                    <td colspan="4"
-                                        class="text-center py-3"
-                                        style="color: var(--db-text-muted);">
+                                    <td colspan="4" class="text-center py-4 text-muted">
+                                        <i class="bi bi-inbox display-6 d-block mb-2"></i>
                                         No hay registros de actividad reciente.
                                     </td>
                                 </tr>
                             }
                         </tbody>
-
                     </table>
-
                 </div>
             </div>
         </div>

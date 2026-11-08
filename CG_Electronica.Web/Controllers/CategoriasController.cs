@@ -118,7 +118,7 @@ public class CategoriasController : Controller
         return View(categoria);
     }
 
-    // POST: Delete (BORRADO LÓGICO / INACTIVACIÓN)
+    // POST: Delete 
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     [Authorize(Policy = "Permiso:Catalogos.Editar")]
@@ -127,7 +127,7 @@ public class CategoriasController : Controller
         var categoria = await _context.Categorias.FindAsync(id);
         if (categoria != null)
         {
-            // BORRADO LÓGICO: Cambiamos estado a Inactivo en lugar de Remove
+            
             categoria.Estado = "Inactivo";
 
             _context.Update(categoria);

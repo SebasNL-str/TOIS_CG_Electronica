@@ -48,9 +48,9 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // =====================================================
+        
         // 1. SEGURIDAD Y USUARIOS
-        // =====================================================
+       
 
         modelBuilder.Entity<Usuario>()
         .ToTable("USUARIO");
@@ -115,9 +115,8 @@ public class AppDbContext : DbContext
         .HasIndex(p => p.NombrePermiso)
         .IsUnique();
 
-        // =====================================================
         // 2. CLIENTES Y CATÁLOGOS
-        // =====================================================
+       
 
         modelBuilder.Entity<Cliente>()
         .ToTable("CLIENTE");
@@ -171,9 +170,6 @@ public class AppDbContext : DbContext
         .HasIndex(c => c.NombreCategoria)
         .IsUnique();
 
-        // =====================================================
-        // 3. HERENCIA TPT: ITEMFACTURABLE, PRODUCTO Y SERVICIO
-        // =====================================================
 
         // Entidad base.
         modelBuilder.Entity<ItemFacturable>()
@@ -193,9 +189,9 @@ public class AppDbContext : DbContext
         .Property(i => i.Estado)
         .HasColumnName("estado");
 
-        // -----------------------------------------------------
+
         // PRODUCTO
-        // -----------------------------------------------------
+        
 
         modelBuilder.Entity<Producto>()
         .ToTable("PRODUCTO")
@@ -245,9 +241,9 @@ public class AppDbContext : DbContext
         .WithMany()
         .HasForeignKey(p => p.IdCategoria);
 
-        // -----------------------------------------------------
+        
         // SERVICIO
-        // -----------------------------------------------------
+        
 
         modelBuilder.Entity<Servicio>()
         .ToTable("SERVICIO")
@@ -257,9 +253,9 @@ public class AppDbContext : DbContext
         .Property(s => s.NombreServicio)
         .HasColumnName("nombreServicio");
 
-        // =====================================================
+        
         // 4. MOVIMIENTOS DE INVENTARIO
-        // =====================================================
+        
 
         modelBuilder.Entity<MovimientoInventario>()
         .ToTable("MOVIMIENTOINVENTARIO")
@@ -285,9 +281,9 @@ public class AppDbContext : DbContext
         .HasForeignKey(m => m.IdUsuario)
         .OnDelete(DeleteBehavior.Restrict);
 
-        // =====================================================
+        
         // 5. AUDITORÍA
-        // =====================================================
+        
 
         modelBuilder.Entity<Auditoria>()
         .ToTable("AUDITORIA")
@@ -303,9 +299,9 @@ public class AppDbContext : DbContext
         .HasForeignKey(a => a.IdUsuario)
         .OnDelete(DeleteBehavior.Restrict);
 
-        // =====================================================
+        
         // 6. FACTURACIÓN
-        // =====================================================
+        
 
         modelBuilder.Entity<Factura>()
         .ToTable("FACTURA")
@@ -355,9 +351,9 @@ public class AppDbContext : DbContext
         .HasIndex(f => f.NumeroFactura)
         .IsUnique();
 
-        // =====================================================
+        
         // 7. DETALLES DE FACTURA
-        // =====================================================
+        
 
         modelBuilder.Entity<DetalleFactura>()
         .ToTable("DETALLEFACTURA")

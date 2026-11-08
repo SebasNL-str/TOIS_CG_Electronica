@@ -1,21 +1,251 @@
 @model CG_Electronica.Web.Models.ViewModels.ReporteVentasViewModel
-@{ ViewData["Title"] = "Reportes de ventas"; }
+@{
+    ViewData["Title"] = "Reportes de Ventas";
+}
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Reportes de ventas</h1>
-    <form method="get" class="row g-3 align-items-end mb-4">
-        <div class="col-md-3"><label asp-for="Desde" class="form-label">Desde</label><input asp-for="Desde" type="date" class="form-control" /></div>
-        <div class="col-md-3"><label asp-for="Hasta" class="form-label">Hasta</label><input asp-for="Hasta" type="date" class="form-control" /></div>
-        <div class="col-md-2"><button class="btn btn-primary w-100">Consultar</button></div>
-    </form>
+    <!-- Encabezado y Breadcrumbs -->
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <div>
+            <h1 class="mb-0 text-white">Reportes de Ventas</h1>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-primary text-decoration-none">Inicio</a></li>
+                <li class="breadcrumb-item active text-white-50">Reportes</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Filtro por Rango de Fechas -->
+    <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 mb-4" style="background-color: #111c30;">
+        <div class="card-body p-3">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4 col-lg-3">
+                    <label asp-for="Desde" class="form-label text-white-50 fw-semibold small">Fecha Desde</label>
+                    <input asp-for="Desde" type="date" class="form-control text-white border-secondary border-opacity-50"
+                           style="background-color: #0d1527;" />
+                </div>
+                <div class="col-md-4 col-lg-3">
+                    <label asp-for="Hasta" class="form-label text-white-50 fw-semibold small">Fecha Hasta</label>
+                    <input asp-for="Hasta" type="date" class="form-control text-white border-secondary border-opacity-50"
+                           style="background-color: #0d1527;" />
+                </div>
+                <div class="col-md-4 col-lg-2">
+                    <button type="submit" class="btn btn-primary w-100 shadow-sm fw-semibold">
+                        <i class="bi bi-search me-1"></i> Consultar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Métricas (KPIs) en Modo Oscuro -->
     <div class="row g-3 mb-4">
-        <div class="col-md-4"><div class="card bg-primary text-white"><div class="card-body"><small>Facturas emitidas</small><h2>@Model.CantidadFacturas</h2></div></div></div>
-        <div class="col-md-4"><div class="card bg-success text-white"><div class="card-body"><small>Total vendido</small><h2>$@Model.TotalVendido.ToString("N2")</h2></div></div></div>
-        <div class="col-md-4"><div class="card bg-warning"><div class="card-body"><small>Productos bajo mínimo</small><h2>@Model.BajoStock.Count</h2></div></div></div>
+        <!-- Facturas Emitidas -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border border-primary border-opacity-25 rounded-4 p-3" style="background-color: rgba(13, 110, 253, 0.1);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <small class="text-white-50 fw-semibold text-uppercase" style="font-size: 0.75rem;">Facturas Emitidas</small>
+                        <h2 class="mb-0 text-white fw-bold mt-1">@Model.CantidadFacturas</h2>
+                    </div>
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-25 text-primary shadow-sm" style="width: 70px; height: 70px;">
+                        <i class="bi bi-receipt" style="font-size: 2.2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Vendido en Córdobas (C$) -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border border-success border-opacity-25 rounded-4 p-3" style="background-color: rgba(25, 135, 84, 0.1);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <small class="text-white-50 fw-semibold text-uppercase" style="font-size: 0.75rem;">Total Vendido</small>
+                        <h2 class="mb-0 text-success fw-bold mt-1">C$ @Model.TotalVendido.ToString("N2")</h2>
+                    </div>
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-25 text-success shadow-sm" style="width: 70px; height: 70px;">
+                        <i class="bi bi-cash-stack" style="font-size: 2.2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Productos Bajo Mínimo -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border border-warning border-opacity-25 rounded-4 p-3" style="background-color: rgba(255, 193, 7, 0.1);">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <small class="text-white-50 fw-semibold text-uppercase" style="font-size: 0.75rem;">Productos Bajo Mínimo</small>
+                        <h2 class="mb-0 text-warning fw-bold mt-1">@Model.BajoStock.Count</h2>
+                    </div>
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-25 text-warning shadow-sm" style="width: 70px; height: 70px;">
+                        <i class="bi bi-exclamation-triangle" style="font-size: 2.2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="row g-4">
-        <div class="col-lg-6"><div class="card"><div class="card-header">Artículos con mayor movimiento</div><div class="card-body"><table class="table table-sm"><thead><tr><th>Artículo</th><th>Cantidad</th><th>Importe</th></tr></thead><tbody>@foreach (var item in Model.MasVendidos) { <tr><td>@item.Nombre</td><td>@item.Cantidad</td><td>$@item.Importe.ToString("N2")</td></tr>}</tbody></table></div></div></div>
-        <div class="col-lg-6"><div class="card"><div class="card-header">Existencias bajo mínimo</div><div class="card-body"><table class="table table-sm"><thead><tr><th>Producto</th><th>Actual</th><th>Mínimo</th></tr></thead><tbody>@foreach (var item in Model.BajoStock) { <tr><td>@item.Nombre</td><td>@item.Existencias</td><td>@item.Minimo</td></tr>}</tbody></table></div></div></div>
+
+    <!-- Sección de Tablas Secundarias (Más Vendidos y Bajo Stock) -->
+    <div class="row g-4 mb-4">
+        <!-- Artículos con mayor movimiento -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 overflow-hidden" style="background-color: #111c30;">
+                <div class="card-header bg-dark text-white py-3 border-bottom border-secondary border-opacity-25">
+                    <span class="fw-bold"><i class="bi bi-trophy text-warning me-2"></i>Artículos con Mayor Movimiento</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Artículo</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-end">Importe (C$)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.MasVendidos != null && Model.MasVendidos.Any())
+                                {
+                                    foreach (var item in Model.MasVendidos)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold text-white">@item.Nombre</td>
+                                            <td class="text-center fw-bold">@item.Cantidad</td>
+                                            <td class="text-end fw-semibold text-primary">C$ @item.Importe.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-4">No se registran ventas en este período.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Existencias bajo mínimo -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 overflow-hidden" style="background-color: #111c30;">
+                <div class="card-header bg-dark text-white py-3 border-bottom border-secondary border-opacity-25">
+                    <span class="fw-bold"><i class="bi bi-shield-exclamation text-danger me-2"></i>Existencias Bajo Mínimo</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th class="text-center">Actual</th>
+                                    <th class="text-center">Mínimo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.BajoStock != null && Model.BajoStock.Any())
+                                {
+                                    foreach (var item in Model.BajoStock)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold text-white">@item.Nombre</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-danger">@item.Existencias</span>
+                                            </td>
+                                            <td class="text-center text-muted fw-bold">@item.Minimo</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center text-success py-4">
+                                            <i class="bi bi-check-circle me-1"></i> Todos los productos tienen existencias óptimas.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="card mt-4"><div class="card-header">Historial de facturas del período</div><div class="card-body table-responsive"><table class="table table-striped"><thead><tr><th>Factura</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead><tbody>@foreach (var factura in Model.Facturas) { <tr><td>@factura.Numero</td><td>@factura.Fecha.ToString("yyyy-MM-dd HH:mm")</td><td>@factura.Cliente</td><td>$@factura.Total.ToString("N2")</td><td>@factura.Estado</td></tr>}</tbody></table></div></div>
+
+    <!-- Historial de Facturas del Período -->
+    <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 overflow-hidden mb-4" style="background-color: #111c30;">
+        <div class="card-header bg-dark text-white py-3 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+            <span class="fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Historial de Facturas del Período</span>
+            <span class="badge bg-secondary">Total: @(Model.Facturas?.Count ?? 0)</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>N° Factura</th>
+                            <th>Fecha y Hora</th>
+                            <th>Cliente</th>
+                            <th class="text-end">Total Facturado</th>
+                            <th class="text-center">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Facturas != null && Model.Facturas.Any())
+                        {
+                            foreach (var factura in Model.Facturas)
+                            {
+                                <tr>
+                                    <td class="fw-bold text-nowrap text-white">
+                                        <i class="bi bi-file-earmark-text text-primary me-1"></i>@factura.Numero
+                                    </td>
+                                    <td class="small text-nowrap text-muted">
+                                        <i class="bi bi-calendar3 me-1"></i>@factura.Fecha.ToString("yyyy-MM-dd HH:mm")
+                                    </td>
+                                    <td class="fw-semibold">@factura.Cliente</td>
+                                    <td class="text-end fw-bold text-primary text-nowrap">
+                                        C$ @factura.Total.ToString("N2")
+                                    </td>
+                                    <td class="text-center">
+                                        @if (factura.Estado == "Emitida")
+                                        {
+                                            <span class="badge bg-primary bg-opacity-75 px-2 py-1">Emitida</span>
+                                        }
+                                        else if (factura.Estado == "Pagada")
+                                        {
+                                            <span class="badge bg-success bg-opacity-75 px-2 py-1">
+                                                <i class="bi bi-check2-circle me-1"></i>Pagada
+                                            </span>
+                                        }
+                                        else if (factura.Estado == "Anulada")
+                                        {
+                                            <span class="badge bg-danger bg-opacity-75 px-2 py-1">
+                                                <i class="bi bi-x-circle me-1"></i>Anulada
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@factura.Estado</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                                    No se encontraron facturas registradas en el rango de fechas seleccionado.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>

@@ -5,92 +5,143 @@
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Registrar Nueva Factura</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a asp-action="Index">Facturas</a></li>
-        <li class="breadcrumb-item active">Crear Venta</li>
-    </ol>
+    <!-- Encabezado y Breadcrumbs -->
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <div>
+            <h1 class="mb-0 text-white">Facturación</h1>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-primary text-decoration-none">Inicio</a></li>
+                <li class="breadcrumb-item"><a asp-action="Index" class="text-primary text-decoration-none">Facturas</a></li>
+                <li class="breadcrumb-item active text-white-50">Nueva Venta</li>
+            </ol>
+        </div>
+    </div>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <form asp-action="Create" id="formFactura">
-                <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-3"></div>
+    <!-- Tarjeta Principal en Modo Oscuro -->
+    <div class="card shadow-lg border border-secondary border-opacity-25 rounded-4 overflow-hidden mb-4" style="background-color: #111c30;">
 
-                <div class="row mb-3">
+        <!-- Franja superior azul de acento -->
+        <div class="bg-primary" style="height: 5px;"></div>
+
+        <div class="card-header border-bottom border-secondary border-opacity-25 py-3" style="background-color: rgba(0, 0, 0, 0.2);">
+            <span class="fw-bold text-white fs-5">
+                <i class="bi bi-receipt text-primary me-2"></i>Emitir Nueva Factura de Venta
+            </span>
+        </div>
+
+        <div class="card-body p-4 text-start">
+            <!-- Formulario con METHOD POST EXPLÍCITO -->
+            <form asp-action="Create" method="post" id="formFactura">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger small mb-3"></div>
+
+                <!-- Cabecera de la Factura: N° Factura y Cliente -->
+                <div class="row g-3 mb-4">
                     <div class="col-md-4">
-                        <label asp-for="NumeroFactura" class="form-label fw-bold">N° de Factura</label>
-                        <input asp-for="NumeroFactura" class="form-control" readonly />
+                        <label asp-for="NumeroFactura" class="form-label text-white fw-semibold small">N° de Factura</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-secondary border-opacity-50 text-white-50" style="background-color: rgba(255, 255, 255, 0.08);">
+                                <i class="bi bi-hash"></i>
+                            </span>
+                            <input asp-for="NumeroFactura" class="form-control text-white border-secondary border-opacity-50 fw-bold"
+                                   style="background-color: rgba(255, 255, 255, 0.05);" readonly />
+                        </div>
                     </div>
                     <div class="col-md-8">
-                        <label asp-for="IdCliente" class="form-label fw-bold">Cliente</label>
-                        <select asp-for="IdCliente" class="form-select" asp-items="ViewBag.Clientes" required>
+                        <label asp-for="IdCliente" class="form-label text-white fw-semibold small">Cliente a Facturar</label>
+                        <select asp-for="IdCliente" class="form-select text-white border-secondary border-opacity-50"
+                                style="background-color: #0d1527;" asp-items="ViewBag.Clientes" required>
                             <option value="">-- Seleccione un Cliente --</option>
                         </select>
+                        <span asp-validation-for="IdCliente" class="text-danger small"></span>
                     </div>
                 </div>
 
-                <hr />
-                <h5 class="text-primary mb-3">Detalle de Productos / Ítems</h5>
+                <hr class="border-secondary opacity-50 my-4" />
 
-                <div class="row g-3 align-items-end mb-3">
+                <!-- Selector de Artículos y Cantidad -->
+                <h5 class="text-primary fw-bold mb-3">
+                    <i class="bi bi-cart-plus me-2"></i>Agregar Productos o Servicios
+                </h5>
+
+                <div class="row g-3 align-items-end mb-4 p-3 rounded-3 border border-secondary border-opacity-25" style="background-color: rgba(255, 255, 255, 0.02);">
                     <div class="col-md-6">
-                        <label class="form-label">Seleccionar artículo</label>
-                        <select id="selectProducto" class="form-select">
+                        <label class="form-label text-white-50 small">Seleccionar Artículo</label>
+                        <select id="selectProducto" class="form-select text-white border-secondary border-opacity-50" style="background-color: #0d1527;">
                             <option value="">-- Seleccione producto o servicio --</option>
-                            @foreach (var item in ViewBag.Items)
+                            @if (ViewBag.Items != null)
                             {
-                                <option value="@item.IdItem" data-precio="@item.PrecioVenta">@item.Nombre — $@item.PrecioVenta.ToString("N2")</option>
+                                foreach (var item in ViewBag.Items)
+                                {
+                                    <option value="@item.IdItem" data-precio="@item.PrecioVenta">
+                                        @item.Nombre — C$ @item.PrecioVenta.ToString("N2")
+                                    </option>
+                                }
                             }
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Cantidad</label>
-                        <input type="number" id="inputCantidad" class="form-control" value="1" min="1" />
+                        <label class="form-label text-white-50 small">Cantidad</label>
+                        <input type="number" id="inputCantidad" class="form-control text-white border-secondary border-opacity-50"
+                               style="background-color: #0d1527;" value="1" min="1" />
                     </div>
                     <div class="col-md-3">
-                        <button type="button" id="btnAgregarItem" class="btn btn-success w-100">
-                            <i class="fas fa-plus"></i> Agregar a Factura
+                        <button type="button" id="btnAgregarItem" class="btn btn-success w-100 shadow-sm fw-semibold">
+                            <i class="bi bi-plus-circle me-1"></i> Agregar a Detalle
                         </button>
                     </div>
                 </div>
 
+                <!-- Tabla Dinámica de Detalles -->
                 <div class="table-responsive mb-4">
-                    <table class="table table-bordered align-middle" id="tablaDetalles">
-                        <thead class="table-secondary">
+                    <table class="table table-striped table-hover align-middle mb-0" id="tablaDetalles">
+                        <thead class="table-dark">
                             <tr>
-                                <th>Producto</th>
-                                <th class="text-center" style="width: 120px;">Cantidad</th>
-                                <th class="text-end" style="width: 150px;">Subtotal</th>
+                                <th>Artículo Facturado</th>
+                                <th class="text-center" style="width: 140px;">Cantidad</th>
+                                <th class="text-end" style="width: 180px;">Subtotal Línea</th>
                                 <th class="text-center" style="width: 100px;">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Ítems agregados dinámicamente vía JS -->
+                            <!-- Mensaje inicial cuando la tabla está vacía -->
+                            <tr id="filaVacia">
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    <i class="bi bi-cart-x display-6 d-block mb-2"></i>
+                                    No ha agregado ningún producto o servicio a la venta.
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="d-flex justify-content-end">
-                    <div class="card bg-light p-3" style="width: 300px;">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span>Subtotal:</span>
-                            <strong id="lblSubtotal">$0.00</strong>
+                <!-- Resumen Contable / Totales en Córdobas  -->
+                <div class="d-flex justify-content-end mb-4">
+                    <div class="p-3 rounded-3 border border-secondary border-opacity-25" style="background-color: rgba(255, 255, 255, 0.05); width: 320px;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Subtotal:</span>
+                            <strong id="lblSubtotal" class="text-white">C$ 0.00</strong>
                         </div>
-                        <div class="d-flex justify-content-between mb-1">
-                            <span>IVA (15%):</span>
-                            <strong id="lblIva">$0.00</strong>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">IVA (15%):</span>
+                            <strong id="lblIva" class="text-white">C$ 0.00</strong>
                         </div>
-                        <hr class="my-2" />
-                        <div class="d-flex justify-content-between">
-                            <span class="fs-5">Total:</span>
-                            <strong class="fs-5 text-success" id="lblTotal">$0.00</strong>
+                        <hr class="border-secondary opacity-50 my-2" />
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fs-5 fw-bold text-white">Total a Pagar:</span>
+                            <strong class="fs-4 text-primary" id="lblTotal">C$ 0.00</strong>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save"></i> Emitir Factura</button>
-                    <a asp-action="Index" class="btn btn-secondary btn-lg">Cancelar</a>
+                <!-- Botones de Acción -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4 shadow fw-semibold">
+                        <i class="bi bi-receipt me-1"></i> Emitir y Cobrar Factura
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                        <i class="bi bi-x-circle me-1"></i> Cancelar
+                    </a>
                 </div>
             </form>
         </div>
@@ -98,24 +149,24 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
     <script>
         let itemsFactura = [];
 
-        // Catálogo de productos disponibles (se pueden obtener sus precios o manejarlos en memoria)
-        // Aquí escuchamos el clic en el botón de agregar
         document.getElementById('btnAgregarItem').addEventListener('click', function () {
             const selectProducto = document.getElementById('selectProducto');
             const inputCantidad = document.getElementById('inputCantidad');
 
             const idItem = selectProducto.value;
             const opcion = selectProducto.options[selectProducto.selectedIndex];
-            const descripcionItem = opcion.text;
-            const precio = parseFloat(opcion.dataset.precio || '0');
+            const descripcionItem = opcion ? opcion.text : '';
+            const precio = parseFloat(opcion ? (opcion.dataset.precio || '0') : '0');
             const cantidad = parseInt(inputCantidad.value);
 
             if (!idItem) {
-                alert('Por favor seleccione un producto.');
+                alert('Por favor seleccione un producto o servicio de la lista.');
                 return;
             }
 
@@ -124,14 +175,7 @@
                 return;
             }
 
-            // Nota: Para obtener el precio unitario de forma dinámica se puede consultar al backend o 
-            // extraerlo si se renderiza en data attributes. Como alternativa segura y directa para este form:
-            // Vamos a verificar si ya existe en la lista para sumarle la cantidad o agregarlo como nuevo.
-            
-            // Para mantener la simplicidad y robustez, haremos una petición rápida o simularemos el precio 
-            // Buscando el elemento o enviando los campos indexados que ASP.NET Core mapea automáticamente.
-            
-            // Verificamos si ya fue agregado
+            // Sumar si ya existe o agregarlo nuevo
             const indexExistente = itemsFactura.findIndex(i => i.idItem === idItem);
             if (indexExistente >= 0) {
                 itemsFactura[indexExistente].cantidad += cantidad;
@@ -145,42 +189,70 @@
             }
 
             actualizarTablaDetalles();
+            inputCantidad.value = 1;
         });
 
         function actualizarTablaDetalles() {
             const tbody = document.querySelector('#tablaDetalles tbody');
             tbody.innerHTML = '';
 
+            if (itemsFactura.length === 0) {
+                tbody.innerHTML = `
+                    <tr id="filaVacia">
+                        <td colspan="4" class="text-center text-muted py-4">
+                            <i class="bi bi-cart-x display-6 d-block mb-2"></i>
+                            No ha agregado ningún producto o servicio a la venta.
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('lblSubtotal').textContent = 'C$ 0.00';
+                document.getElementById('lblIva').textContent = 'C$ 0.00';
+                document.getElementById('lblTotal').textContent = 'C$ 0.00';
+                return;
+            }
+
             itemsFactura.forEach((item, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
-                        ${item.descripcion}
+                        <strong class="text-white">${item.descripcion}</strong>
                         <input type="hidden" name="items[${index}].IdItem" value="${item.idItem}" />
                     </td>
-                    <td class="text-center">
+                    <td class="text-center fw-bold">
                         ${item.cantidad}
                         <input type="hidden" name="items[${index}].Cantidad" value="${item.cantidad}" />
                     </td>
-                    <td class="text-end">$${(item.precio * item.cantidad).toFixed(2)}</td>
+                    <td class="text-end fw-semibold text-primary">C$ ${(item.precio * item.cantidad).toFixed(2)}</td>
                     <td class="text-center">
-                        <button type="button" class="btn btn-danger btn-sm" onclick="eliminarItem(${index})">
-                            <i class="fas fa-trash"></i>
+                        <button type="button" class="btn btn-outline-danger btn-sm rounded-circle" onclick="eliminarItem(${index})" title="Quitar">
+                            <i class="bi bi-trash"></i>
                         </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
-            const subtotal = itemsFactura.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+
+            // Cálculos en Córdobas con IVA 15%
+            const subtotal = itemsFactura.reduce((sum, item) => sum + (item.precio * item.cantidad), 0);
             const iva = subtotal * 0.15;
-            document.getElementById('lblSubtotal').textContent = `$${subtotal.toFixed(2)}`;
-            document.getElementById('lblIva').textContent = `$${iva.toFixed(2)}`;
-            document.getElementById('lblTotal').textContent = `$${(subtotal + iva).toFixed(2)}`;
+            const total = subtotal + iva;
+
+            document.getElementById('lblSubtotal').textContent = `C$ ${subtotal.toFixed(2)}`;
+            document.getElementById('lblIva').textContent = `C$ ${iva.toFixed(2)}`;
+            document.getElementById('lblTotal').textContent = `C$ ${total.toFixed(2)}`;
         }
 
         function eliminarItem(index) {
             itemsFactura.splice(index, 1);
             actualizarTablaDetalles();
         }
+
+        // Validación defensiva antes de enviar el formulario
+        document.getElementById('formFactura').addEventListener('submit', function (e) {
+            if (itemsFactura.length === 0) {
+                e.preventDefault();
+                alert('Debe agregar al menos un producto o servicio para poder emitir la factura.');
+            }
+        });
     </script>
 }

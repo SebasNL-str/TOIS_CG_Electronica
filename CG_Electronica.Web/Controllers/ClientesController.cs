@@ -139,7 +139,7 @@ public class ClientesController : Controller
         return View(cliente);
     }
 
-    // POST: Delete(BORRADO LÓGICO / INACTIVACIÓN)
+    // POST: Delete
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     [Authorize(Policy = "Permiso:Clientes.Editar")]
@@ -148,7 +148,7 @@ public class ClientesController : Controller
         var cliente = await _context.Clientes.FindAsync(id);
         if (cliente != null)
         {
-            // BORRADO LÓGICO: En lugar de _context.Clientes.Remove(cliente);
+            
             cliente.Estado = "Inactivo";
 
             _context.Update(cliente);

@@ -1,11 +1,11 @@
 ﻿using CG_Electronica.Web.Data;
 using CG_Electronica.Web.Models;
 using CG_Electronica.Web.Models.ViewModels;
-using CG_Electronica.Web.Services; // <-- Agregado para Auditoría
+using CG_Electronica.Web.Services; 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims; // <-- Agregado para ID de usuario
+using System.Security.Claims;
 
 namespace CG_Electronica.Web.Controllers
 {
@@ -13,7 +13,7 @@ namespace CG_Electronica.Web.Controllers
     public class RolesController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly IServicioAuditoria _servicioAuditoria; // <-- Inyectamos auditoría
+        private readonly IServicioAuditoria _servicioAuditoria; 
 
         public RolesController(AppDbContext context, IServicioAuditoria servicioAuditoria)
         {
@@ -232,7 +232,7 @@ namespace CG_Electronica.Web.Controllers
             return View(rol);
         }
 
-        // 8. POST: Delete (Inactivación Lógica)
+        // 8. POST: Delete 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "Permiso:Roles.Editar")]
@@ -249,7 +249,7 @@ namespace CG_Electronica.Web.Controllers
 
                 string nombreRolInactivado = rol.NombreRol;
 
-                // BORRADO LÓGICO
+              
                 rol.Estado = "Inactivo";
                 _context.Update(rol);
                 await _context.SaveChangesAsync();

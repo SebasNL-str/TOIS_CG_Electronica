@@ -5,105 +5,176 @@
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Factura N° @Model.NumeroFactura</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a asp-action="Index">Facturas</a></li>
-        <li class="breadcrumb-item active">Detalle</li>
-    </ol>
+    <!-- Encabezado y Breadcrumbs -->
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <div>
+            <h1 class="mb-0">Factura N° @Model.NumeroFactura</h1>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+                <li class="breadcrumb-item"><a asp-action="Index">Facturas</a></li>
+                <li class="breadcrumb-item active">Detalle</li>
+            </ol>
+        </div>
+    </div>
 
-    <div class="card mb-4">
-        @if (TempData["Mensaje"] is string mensaje)
-        {
-            <div class="alert alert-success m-3">@mensaje</div>
-        }
-        @if (TempData["Error"] is string error)
-        {
-            <div class="alert alert-danger m-3">@error</div>
-        }
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div><i class="fas id-card me-1"></i> Información General</div>
+    <!-- Alertas TempData -->
+    @if (TempData["Mensaje"] != null || TempData["Ok"] != null)
+    {
+        var msg = TempData["Mensaje"] ?? TempData["Ok"];
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@msg
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Tarjeta Principal con Estilo Dark -->
+    <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 overflow-hidden mb-4">
+
+        <!-- Cabecera de la Tarjeta -->
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+            <span class="fw-bold fs-5">
+                <i class="bi bi-file-earmark-text text-primary me-2"></i>Información General de la Factura
+            </span>
             <div>
-                <span class="badge bg-success fs-6">@Model.Estado</span>
+                @if (Model.Estado == "Emitida")
+                {
+                    <span class="badge bg-primary px-3 py-2 fs-6">Emitida</span>
+                }
+                else if (Model.Estado == "Pagada")
+                {
+                    <span class="badge bg-success px-3 py-2 fs-6">
+                        <i class="bi bi-check2-circle me-1"></i>Pagada
+                    </span>
+                }
+                else if (Model.Estado == "Anulada")
+                {
+                    <span class="badge bg-danger px-3 py-2 fs-6">
+                        <i class="bi bi-x-circle me-1"></i>Anulada
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary px-3 py-2 fs-6">@Model.Estado</span>
+                }
             </div>
         </div>
-        <div class="card-body">
-            <div class="row mb-4">
+
+        <div class="card-body p-4">
+            <!-- Datos de la Transacción y del Cliente -->
+            <div class="row g-4 mb-4">
                 <div class="col-md-6">
-                    <p><strong>Fecha y Hora:</strong> @Model.Fecha.ToString("yyyy-MM-dd HH:mm:ss")</p>
-                    <p><strong>Usuario Emisor:</strong> @Model.Usuario?.NombreUsuario</p>
+                    <div class="p-3 rounded-3 border border-secondary border-opacity-25" style="background-color: rgba(255, 255, 255, 0.03);">
+                        <h6 class="text-primary fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Datos de la Transacción</h6>
+                        <p class="mb-2"><span class="text-muted">Fecha y Hora:</span> <strong class="text-white">@Model.Fecha.ToString("yyyy-MM-dd HH:mm:ss")</strong></p>
+                        <p class="mb-2"><span class="text-muted">Usuario Emisor / Cajero:</span> <strong class="text-white">@(Model.Usuario?.NombreUsuario ?? "N/A")</strong></p>
+                        @if (Model.FechaAnulacion.HasValue)
+                        {
+                            <p class="mb-0 text-danger"><i class="bi bi-exclamation-triangle me-1"></i><strong>Fecha de Anulación:</strong> @Model.FechaAnulacion.Value.ToString("yyyy-MM-dd HH:mm")</p>
+                        }
+                    </div>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>Cliente:</strong> @Model.NombreClienteHistorico</p>
-                    <p><strong>Cédula / RUC:</strong> @Model.CedulaClienteHistorica</p>
-                    <p><strong>Teléfono:</strong> @Model.TelefonoClienteHistorico</p>
+                    <div class="p-3 rounded-3 border border-secondary border-opacity-25" style="background-color: rgba(255, 255, 255, 0.03);">
+                        <h6 class="text-primary fw-bold mb-3"><i class="bi bi-person-badge me-2"></i>Datos Históricos del Cliente</h6>
+                        <p class="mb-2"><span class="text-muted">Nombre del Cliente:</span> <strong class="text-white">@(Model.NombreClienteHistorico ?? Model.Cliente?.NombreCliente ?? "Consumidor Final")</strong></p>
+                        <p class="mb-2"><span class="text-muted">Cédula / RUC:</span> <strong class="text-white">@(Model.CedulaClienteHistorica ?? Model.Cliente?.Cedula ?? "N/A")</strong></p>
+                        <p class="mb-0"><span class="text-muted">Teléfono de Contacto:</span> <strong class="text-white">@(Model.TelefonoClienteHistorico ?? Model.Cliente?.Telefono ?? "N/A")</strong></p>
+                    </div>
                 </div>
             </div>
 
-            <h5 class="text-primary mb-3">Productos Facturados</h5>
-            <div class="table-responsive">
-                <table class="table table-bordered table-striped align-middle">
+            <!-- Tabla de Ítems Facturados -->
+            <h5 class="text-primary fw-bold mb-3"><i class="bi bi-cart-check me-2"></i>Ítems y Productos Facturados</h5>
+            <div class="table-responsive mb-4">
+                <table class="table table-striped table-hover align-middle mb-0">
                     <thead class="table-dark">
                         <tr>
-                            <th>Ítem</th>
-                            <th class="text-center">Cantidad</th>
-                            <th class="text-end">Precio Unitario Histórico</th>
-                            <th class="text-end">Subtotal Línea</th>
+                            <th>Descripción del Ítem</th>
+                            <th class="text-center" style="width: 120px;">Cantidad</th>
+                            <th class="text-end" style="width: 220px;">Precio Unit. Histórico</th>
+                            <th class="text-end" style="width: 220px;">Subtotal Línea</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var det in Model.Detalles)
+                        @if (Model.Detalles != null && Model.Detalles.Any())
                         {
-                            var subtotalLinea = det.Cantidad * det.PrecioUnitarioHistorico;
+                            foreach (var det in Model.Detalles)
+                            {
+                                var subtotalLinea = det.Cantidad * det.PrecioUnitarioHistorico;
+                                <tr>
+                                    <td>
+                                        @if (det.Item is CG_Electronica.Web.Models.Producto producto)
+                                        {
+                                            <i class="bi bi-box-seam text-secondary me-2"></i>
+                                
+                                            <strong>@producto.Descripcion</strong>
+                                        }
+                                        else if (det.Item is CG_Electronica.Web.Models.Servicio servicio)
+                                        {
+                                            <i class="bi bi-tools text-secondary me-2"></i>
+                                
+                                            <strong>@servicio.NombreServicio</strong>
+                                        }
+                                        else
+                                        {
+                                            <span>Ítem #@det.IdItem</span>
+                                        }
+                                    </td>
+                                    <td class="text-center fw-bold">@det.Cantidad</td>
+                                    <td class="text-end">C$ @det.PrecioUnitarioHistorico.ToString("N2")</td>
+                                    <td class="text-end fw-bold text-white">C$ @subtotalLinea.ToString("N2")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
                             <tr>
-                                <td>
-                                    @if (det.Item is CG_Electronica.Web.Models.Producto producto)
-                                    {
-                                        @producto.Descripcion
-                                    }
-                                    else if (det.Item is CG_Electronica.Web.Models.Servicio servicio)
-                                    {
-                                        @servicio.NombreServicio
-                                    }
-                                    else
-                                    {
-                                        @:Ítem @det.IdItem
-                                    }
-                                </td>
-                                <td class="text-center">@det.Cantidad</td>
-                                <td class="text-end">$@det.PrecioUnitarioHistorico.ToString("N2")</td>
-                                <td class="text-end">$@subtotalLinea.ToString("N2")</td>
+                                <td colspan="4" class="text-center text-muted py-3">No hay líneas registradas en esta factura.</td>
                             </tr>
                         }
                     </tbody>
                 </table>
             </div>
 
-            <div class="d-flex justify-content-end mt-3">
-                <div class="card bg-light p-3" style="width: 300px;">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>Subtotal:</span>
-                        <strong>$@Model.Subtotal.ToString("N2")</strong>
+            <!-- Resumen Contable / Totales (Cero cajas blancas) -->
+            <div class="d-flex justify-content-end mb-4">
+                <div class="p-3 rounded-3 border border-secondary border-opacity-25" style="background-color: rgba(255, 255, 255, 0.05); width: 320px;">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal:</span>
+                        <span class="fw-semibold text-white">C$ @Model.Subtotal.ToString("N2")</span>
                     </div>
-                    <div class="d-flex justify-content-between mb-1">
-                        <span>IVA (15%):</span>
-                        <strong>$@Model.Iva.ToString("N2")</strong>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">IVA (15%):</span>
+                        <span class="fw-semibold text-white">C$ @Model.Iva.ToString("N2")</span>
                     </div>
-                    <hr class="my-2" />
-                    <div class="d-flex justify-content-between">
-                        <span class="fs-5">Total:</span>
-                        <strong class="fs-5 text-success">$@Model.Total.ToString("N2")</strong>
+                    <hr class="border-secondary opacity-50 my-2" />
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fs-5 fw-bold text-white">Total:</span>
+                        <strong class="fs-4 text-primary">C$ @Model.Total.ToString("N2")</strong>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-4">
+            <!-- Botones de Acción -->
+            <div class="d-flex gap-2">
                 @if (Model.Estado == "Emitida")
                 {
-                    <form asp-action="Anular" asp-route-id="@Model.IdFactura" method="post" class="d-inline" onsubmit="return confirm('¿Confirma la anulación de esta factura?');">
-                        <button type="submit" class="btn btn-danger"><i class="fas fa-ban"></i> Anular factura</button>
+                    <form asp-action="Anular" asp-route-id="@Model.IdFactura" method="post" class="d-inline" onsubmit="return confirm('¿Confirma la anulación formal de esta factura? Se revertirá en el sistema.');">
+                        <button type="submit" class="btn btn-danger shadow-sm">
+                            <i class="bi bi-ban me-1"></i> Anular factura
+                        </button>
                     </form>
                 }
-                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver al Listado</a>
+                <a asp-action="Index" class="btn btn-outline-light shadow-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Volver al Listado
+                </a>
             </div>
         </div>
     </div>

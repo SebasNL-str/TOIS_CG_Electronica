@@ -5,68 +5,89 @@
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Historial de Auditoría</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Dashboard</a></li>
-        <li class="breadcrumb-item active">Auditoría</li>
-    </ol>
-
-    <!-- Formulario de Filtros -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-dark text-white">
-            <i class="fas fa-filter me-1"></i> Filtros de Búsqueda
+    <!-- Encabezado y Breadcrumbs -->
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <div>
+            <h1 class="mb-0 text-white">Historial de Auditoría</h1>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-primary text-decoration-none">Inicio</a></li>
+                <li class="breadcrumb-item active text-white-50">Auditoría</li>
+            </ol>
         </div>
-        <div class="card-body">
+    </div>
+
+    <!-- Tarjeta de Formulario de Filtros (Modo Oscuro) -->
+    <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 mb-4" style="background-color: #111c30;">
+        <div class="card-header bg-dark text-white py-3 border-bottom border-secondary border-opacity-25">
+            <span class="fw-bold">
+                <i class="bi bi-funnel-fill text-primary me-2"></i>Filtros de Búsqueda
+            </span>
+        </div>
+        <div class="card-body p-4">
             <form id="formFiltros" method="get" asp-action="Index" class="row g-3">
+
                 <div class="col-md-3">
-                    <label class="form-label fw-bold">Acción</label>
-                    <select id="FiltroAccion" name="Accion" class="form-select" asp-items="filtro.AccionesList">
+                    <label class="form-label text-white-50 fw-semibold small">Acción</label>
+                    <select id="FiltroAccion" name="Accion" class="form-select text-white border-secondary border-opacity-50" style="background-color: #0d1527;" asp-items="filtro.AccionesList">
                         <option value="">-- Todas las acciones --</option>
                     </select>
                 </div>
+
                 <div class="col-md-3">
-                    <label class="form-label fw-bold">Módulo</label>
-                    <select id="FiltroModulo" name="Modulo" class="form-select" asp-items="filtro.ModulosList">
+                    <label class="form-label text-white-50 fw-semibold small">Módulo</label>
+                    <select id="FiltroModulo" name="Modulo" class="form-select text-white border-secondary border-opacity-50" style="background-color: #0d1527;" asp-items="filtro.ModulosList">
                         <option value="">-- Todos los módulos --</option>
                     </select>
                 </div>
+
                 <div class="col-md-3">
-                    <label class="form-label fw-bold">Usuario Responsable</label>
-                    <select name="IdUsuario" class="form-select" asp-items="filtro.UsuariosList">
+                    <label class="form-label text-white-50 fw-semibold small">Usuario Responsable</label>
+                    <select name="IdUsuario" class="form-select text-white border-secondary border-opacity-50" style="background-color: #0d1527;" asp-items="filtro.UsuariosList">
                         <option value="">-- Todos los usuarios --</option>
                     </select>
                 </div>
+
                 <div class="col-md-3">
-                    <label class="form-label fw-bold">Búsqueda por Texto</label>
-                    <input type="text" name="BusquedaTexto" value="@filtro.BusquedaTexto" class="form-control" placeholder="Acción, registro u observación..." />
+                    <label class="form-label text-white-50 fw-semibold small">Búsqueda por Texto</label>
+                    <input type="text" name="BusquedaTexto" value="@filtro.BusquedaTexto" class="form-control text-white border-secondary border-opacity-50" style="background-color: #0d1527;" placeholder="Buscar en logs..." />
                 </div>
+
                 <div class="col-md-3">
-                    <label class="form-label fw-bold">Fecha Inicial</label>
-                    <input type="date" name="FechaInicio" value="@filtro.FechaInicio?.ToString("yyyy-MM-dd")" class="form-control" />
+                    <label class="form-label text-white-50 fw-semibold small">Fecha Inicial</label>
+                    <input type="date" name="FechaInicio" value="@filtro.FechaInicio?.ToString("yyyy-MM-dd")" class="form-control text-white border-secondary border-opacity-50" style="background-color: #0d1527;" />
                 </div>
+
                 <div class="col-md-3">
-                    <label class="form-label fw-bold">Fecha Final</label>
-                    <input type="date" name="FechaFin" value="@filtro.FechaFin?.ToString("yyyy-MM-dd")" class="form-control" />
+                    <label class="form-label text-white-50 fw-semibold small">Fecha Final</label>
+                    <input type="date" name="FechaFin" value="@filtro.FechaFin?.ToString("yyyy-MM-dd")" class="form-control text-white border-secondary border-opacity-50" style="background-color: #0d1527;" />
                 </div>
+
                 <div class="col-md-6 d-flex align-items-end gap-2">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-search me-1"></i> Filtrar</button>
-                    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-undo me-1"></i> Limpiar Filtros</a>
+                    <button type="submit" class="btn btn-primary shadow-sm px-4 fw-semibold">
+                        <i class="bi bi-search me-1"></i> Filtrar
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-light px-4">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Limpiar Filtros
+                    </a>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Tabla de Resultados -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-secondary text-white">
-            <i class="fas fa-history me-1"></i> Registros de Auditoría Encontrados (@Model.Count())
+    <!-- Tarjeta de Tabla de Resultados (Modo Oscuro) -->
+    <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 overflow-hidden mb-4" style="background-color: #111c30;">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3 border-bottom border-secondary border-opacity-25">
+            <span class="fw-bold">
+                <i class="bi bi-clock-history text-info me-2"></i>Registros de Auditoría
+            </span>
+            <span class="badge bg-secondary">Total: @(Model?.Count() ?? 0)</span>
         </div>
-        <div class="card-body">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-bordered table-striped align-middle">
+                <table class="table table-striped table-hover align-middle mb-0">
                     <thead class="table-dark">
                         <tr>
-                            <th>ID</th>
+                            <th style="width: 80px;">ID</th>
                             <th>Acción</th>
                             <th>Registro Afectado</th>
                             <th>Usuario Responsable</th>
@@ -80,19 +101,37 @@
                             foreach (var item in Model)
                             {
                                 <tr>
-                                    <td>@item.IdAuditoria</td>
-                                    <td><span class="badge bg-info text-dark">@item.Accion</span></td>
-                                    <td><code>@item.RegistroAfectado</code></td>
-                                    <td>@(item.Usuario?.NombreUsuario ?? "Sistema")</td>
-                                    <td>@item.FechaHora.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                                    <td>@item.Observacion</td>
+                                    <td class="text-muted fw-bold">#@item.IdAuditoria</td>
+
+                                    <td>
+                                        <span class="badge bg-info bg-opacity-75 text-white px-2 py-1">@item.Accion</span>
+                                    </td>
+
+                                    <td>
+                                        <code class="text-info border border-secondary border-opacity-50 px-2 py-1 rounded" style="background-color: rgba(0,0,0,0.4);">
+                                            @item.RegistroAfectado
+                                        </code>
+                                    </td>
+
+                                    <td class="fw-semibold text-white">
+                                        <i class="bi bi-person me-1 text-secondary"></i>@(item.Usuario?.NombreUsuario ?? "Sistema")
+                                    </td>
+
+                                    <td class="small text-white-50 text-nowrap">
+                                        <i class="bi bi-calendar3 me-1 text-muted"></i>@item.FechaHora.ToString("yyyy-MM-dd HH:mm:ss")
+                                    </td>
+
+                                    <td class="small text-white-50">
+                                        @item.Observacion
+                                    </td>
                                 </tr>
                             }
                         }
                         else
                         {
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">
+                                <td colspan="6" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox display-6 d-block mb-2"></i>
                                     No se encontraron registros de auditoría con los filtros seleccionados.
                                 </td>
                             </tr>

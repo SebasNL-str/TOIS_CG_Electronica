@@ -9,7 +9,7 @@ using System.Security.Claims;
 
 namespace CG_Electronica.Web.Controllers;
 
-[Authorize(Policy = "Permiso:Catalogos.Ver")]
+[Authorize(Policy = "Permiso:Servicios.Ver")]
 public class ServiciosController : Controller
 {
     private readonly AppDbContext _context;
@@ -29,7 +29,7 @@ public class ServiciosController : Controller
         return View(servicios);
     }
 
-    [Authorize(Policy = "Permiso:Catalogos.Editar")]
+    [Authorize(Policy = "Permiso:Servicios.Editar")]
     public IActionResult Create()
     {
         return View(new ServicioCreateViewModel());
@@ -37,7 +37,7 @@ public class ServiciosController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Policy = "Permiso:Catalogos.Editar")]
+    [Authorize(Policy = "Permiso:Servicios.Editar")]
     public async Task<IActionResult> Create(ServicioCreateViewModel model)
     {
         if (await _context.Servicios.AnyAsync(s => s.NombreServicio.ToLower() == model.NombreServicio.ToLower()))
@@ -67,9 +67,9 @@ public class ServiciosController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    // GET: Servicios/Edit/5
+    // GET: Edit
     [HttpGet]
-    [Authorize(Policy = "Permiso:ServiciosEditar")]
+    [Authorize(Policy = "Permiso:Servicios.Editar")]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null) return NotFound();
@@ -80,10 +80,10 @@ public class ServiciosController : Controller
         return View(servicio);
     }
 
-    // POST: Servicios/Edit/5
+    // POST: Edit
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Policy = "Permiso:ServiciosEditar")]
+    [Authorize(Policy = "Permiso:Servicios.Editar")]
     public async Task<IActionResult> Edit(
         int id,
         [Bind("IdItem,NombreServicio,PrecioVenta,Estado")] Servicio servicio)

@@ -1,77 +1,149 @@
 @model IEnumerable<CG_Electronica.Web.Models.MovimientoInventario>
+@using CG_Electronica.Web.Helpers
 
 @{
     ViewData["Title"] = "Kardex de Inventario";
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Kardex e Historial de Movimientos</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
-        <li class="breadcrumb-item active">Inventario</li>
-    </ol>
+    <!-- Encabezado y Breadcrumbs -->
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <div>
+            <h1 class="mb-0">Inventario</h1>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
+                <li class="breadcrumb-item active">Inventario</li>
+            </ol>
+        </div>
+        @if (User.TienePermiso("Inventario.Editar"))
+        {
+            <a asp-action="RegistrarMovimiento" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i> Registrar Movimiento Manual
+            </a>
+        }
+    </div>
 
-    @if (TempData["Mensaje"] != null)
+    <!-- Alertas TempData -->
+    @if (TempData["Mensaje"] != null || TempData["Ok"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["Mensaje"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        var msg = TempData["Mensaje"] ?? TempData["Ok"];
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>@msg
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
 
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div><i class="fas fa-exchange-alt me-1"></i> Movimientos Registrados</div>
-            <a asp-action="RegistrarMovimiento" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus-circle"></i> Registrar Movimiento Manual
-            </a>
+    <!-- Tarjeta Principal con Estilo Dark -->
+    <div class="card shadow-sm border border-secondary border-opacity-25 rounded-4 mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
+            <span class="fw-bold">
+                <i class="bi bi-arrow-left-right me-2"></i>Historial de Movimientos Registrados
+            </span>
+            <span class="badge bg-secondary">Total: @(Model?.Count() ?? 0)</span>
         </div>
-        <div class="card-body">
+
+        <div class="card-body p-4">
             <!-- Formulario de Filtro por Producto -->
             <form method="get" class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Filtrar por Producto:</label>
-                    <select name="idProducto" class="form-select" asp-items="ViewBag.Productos" onchange="this.form.submit()">
+                <div class="col-md-6 col-lg-5">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-funnel text-primary me-1"></i>Filtrar por Producto:
+                    </label>
+                    <select name="idProducto" class="form-select shadow-sm" asp-items="ViewBag.Productos" onchange="this.form.submit()">
                         <option value="">-- Todos los productos --</option>
                     </select>
                 </div>
             </form>
 
             <div class="table-responsive">
-                <table class="table table-bordered table-striped align-middle">
+                <table class="table table-striped table-hover align-middle mb-0">
                     <thead class="table-dark">
                         <tr>
                             <th>Fecha y Hora</th>
-                            <th>Tipo</th>
+                            <th class="text-center">Tipo</th>
                             <th>Motivo</th>
                             <th>Producto</th>
-                            <th>Cantidad</th>
-                            <th>Costo Unit.</th>
+                            <th class="text-center">Cantidad</th>
+                            <th class="text-end">Costo Unit.</th>
                             <th>Usuario</th>
                             <th>Observación</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model)
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <!-- Fecha -->
+                                    <td class="small text-nowrap">
+                                        <i class="bi bi-calendar3 me-1 text-muted"></i>@item.FechaHora.ToString("yyyy-MM-dd HH:mm")
+                                    </td>
+
+                                    <!-- Tipo con Badge -->
+                                    <td class="text-center">
+                                        @if (item.TipoMovimiento == "Entrada")
+                                        {
+                                            <span class="badge bg-success bg-opacity-75 px-2 py-1">
+                                                <i class="bi bi-box-arrow-in-down me-1"></i>Entrada
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger bg-opacity-75 px-2 py-1">
+                                                <i class="bi bi-box-arrow-up me-1"></i>Salida
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <!-- Motivo -->
+                                    <td>
+                                        <span class="fw-semibold">@item.Motivo</span>
+                                    </td>
+
+                                    <!-- Producto -->
+                                    <td>
+                                        <strong>@(item.Producto?.Descripcion ?? "Producto N/A")</strong>
+                                    </td>
+
+                                    <!-- Cantidad -->
+                                    <td class="text-center fw-bold">
+                                        @item.Cantidad
+                                    </td>
+
+                                    <!-- Costo Unitario en Córdobas (C$) -->
+                                    <td class="text-end fw-semibold text-primary text-nowrap">
+                                        C$ @item.PrecioCompraUnitario.ToString("N2")
+                                    </td>
+
+                                    <!-- Usuario -->
+                                    <td>
+                                        <span class="badge bg-secondary">
+                                            <i class="bi bi-person me-1"></i>@(item.Usuario?.NombreUsuario ?? "N/A")
+                                        </span>
+                                    </td>
+
+                                    <!-- Observación -->
+                                    <td class="small text-muted">
+                                        @(string.IsNullOrEmpty(item.Observacion) ? "-" : item.Observacion)
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td>@item.FechaHora.ToString("yyyy-MM-dd HH:mm")</td>
-                                <td>
-                                    @if (item.TipoMovimiento == "Entrada")
-                                    {
-                                        <span class="badge bg-success">Entrada</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">Salida</span>
-                                    }
+                                <td colspan="8" class="text-center text-muted py-5">
+                                    <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                                    No se encontraron movimientos de inventario registrados.
                                 </td>
-                                <td>@item.Motivo</td>
-                                <td><strong>@item.Producto?.Descripcion</strong></td>
-                                <td>@item.Cantidad</td>
-                                <td>$@item.PrecioCompraUnitario.ToString("N2")</td>
-                                <td>@item.Usuario?.NombreUsuario</td>
-                                <td>@item.Observacion</td>
                             </tr>
                         }
                     </tbody>
