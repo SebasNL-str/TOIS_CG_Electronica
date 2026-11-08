@@ -75,7 +75,7 @@ public class ProductosController : Controller
 
     // GET: Productos/Edit/5
     [HttpGet]
-    [Authorize(Policy = "Permiso:ProductosEditar")]
+    [Authorize(Policy = "Permiso:Productos.Editar")]
     public async Task<IActionResult> Edit(int? id)
     {
         if (id == null) return NotFound();
@@ -93,7 +93,7 @@ public class ProductosController : Controller
     // POST: Productos/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    [Authorize(Policy = "Permiso:ProductosEditar")]
+    [Authorize(Policy = "Permiso:Productos.Editar")]
     public async Task<IActionResult> Edit(int id, Producto producto)
     {
         if (id != producto.IdItem) return NotFound();
