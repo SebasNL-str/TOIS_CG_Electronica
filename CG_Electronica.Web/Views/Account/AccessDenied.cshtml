@@ -1,31 +1,74 @@
-﻿@{
+﻿@using CG_Electronica.Web.Helpers
+@{
     ViewData["Title"] = "Acceso Denegado";
 }
 
 <div class="row justify-content-center align-items-center" style="min-height: 75vh;">
-    <div class="col-md-6 col-lg-5 text-center">
-        <div class="card shadow-lg border-0 rounded-4 p-4 p-sm-5">
-            <div class="card-body">
+    <div class="col-md-7 col-lg-5 text-center">
+        <!-- Tarjeta integrada con el fondo oscuro y bordes sutiles -->
+        <div class="card shadow-lg border border-secondary border-opacity-25 rounded-4 overflow-hidden" style="background-color: #111c30;">
 
-                <!-- Ícono grande de advertencia/candado -->
-                <div class="mb-4">
-                    <i class="bi bi-shield-lock-fill text-danger display-1"></i>
+            <!-- Franja superior en rojo de seguridad -->
+            <div class="bg-danger" style="height: 5px;"></div>
+
+            <div class="card-body p-4 p-sm-5 text-center">
+
+                <!-- Ícono visible en rojo brillante con aura suave -->
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3 shadow"
+                     style="width: 90px; height: 90px; background-color: rgba(220, 53, 69, 0.15); border: 1px solid rgba(220, 53, 69, 0.35);">
+                    <i class="bi bi-shield-lock-fill text-danger" style="font-size: 3rem;"></i>
                 </div>
 
-                <h2 class="text-danger fw-bold mb-3">Acceso Denegado</h2>
+                <!-- Insignia del Código de Estado -->
+                <div class="mb-3">
+                    <span class="badge rounded-pill px-3 py-1 fw-bold text-danger"
+                          style="background-color: rgba(220, 53, 69, 0.2); border: 1px solid rgba(220, 53, 69, 0.4); font-size: 0.75rem; letter-spacing: 0.5px;">
+                        ERROR 403 • PROHIBIDO
+                    </span>
+                </div>
 
-                <p class="text-muted mb-4">
-                    Lo sentimos, tu usuario no cuenta con los permisos necesarios para acceder a esta sección o recurso del sistema. Si consideras que esto es un error, comunícate con el administrador.
+                <!-- Título en blanco brillante (100% legible) -->
+                <h2 class="fw-bold text-white mb-2">Acceso Denegado</h2>
+
+                <p class="text-white-50 small mb-4">
+                    Tu usuario no tiene los privilegios necesarios para consultar o modificar este recurso.
                 </p>
 
-                <!-- Botón de retorno al inicio -->
-                <div class="d-grid">
-                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg rounded-pill shadow-sm">
-                        <i class="bi bi-house-door-fill"></i> Volver al Inicio
+                <!-- Caja de sesión en modo oscuro (sin rectángulos blancos) -->
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="rounded-3 py-2 px-3 mb-4 text-start small border border-secondary border-opacity-25"
+                         style="background-color: rgba(255, 255, 255, 0.05);">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-white-50"><i class="bi bi-person-fill text-primary me-1"></i> Usuario:</span>
+                            <span class="fw-bold text-white">@User.NombreCompleto()</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="text-white-50"><i class="bi bi-shield-check text-warning me-1"></i> Rol actual:</span>
+                            <span class="badge bg-primary bg-opacity-75 text-white px-2 py-1">@User.Rol()</span>
+                        </div>
+                    </div>
+                }
+
+                <!-- Botones de Acción -->
+                <div class="d-flex flex-column gap-2">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg rounded-pill shadow-sm fw-semibold">
+                        <i class="bi bi-house-door-fill me-1"></i> Ir al Inicio
                     </a>
+                    <button type="button" onclick="history.back()" class="btn btn-outline-light rounded-pill py-2">
+                        <i class="bi bi-arrow-left me-1"></i> Regresar a la página anterior
+                    </button>
                 </div>
 
             </div>
+
+            <!-- Pie de tarjeta en tono oscuro parejo -->
+            <div class="card-footer text-center py-3 border-top border-secondary border-opacity-25" style="background-color: rgba(0, 0, 0, 0.25);">
+                <small class="text-white-50" style="font-size: 0.8rem;">
+                    <i class="bi bi-info-circle me-1"></i> Si requieres acceso a esta área, contacta al Administrador.
+                </small>
+            </div>
+
         </div>
     </div>
 </div>
